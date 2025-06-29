@@ -1,0 +1,242 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  background-color: #000000;
+  color: #ffffff;
+}
+
+/* Home Page Styles */
+/* Add this to your existing App.css */
+.home-container {
+  min-height: 100vh;
+  background:
+              url('./image/netflix-background.jpeg') 
+              center/cover no-repeat;}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 50px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.netflix-logo {
+  font-size: 32px;
+  font-weight: bold;
+  color: #e50914;
+  text-decoration: none;
+}
+
+.signin-btn {
+  background-color: #e50914;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.3s;
+}
+
+.signin-btn:hover {
+  background-color: #f40612;
+}
+
+.hero-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 150px 20px;
+}
+
+.hero-title {
+  font-size: 48px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  max-width: 800px;
+}
+
+.hero-subtitle {
+  font-size: 24px;
+  margin-bottom: 30px;
+  max-width: 600px;
+}
+
+.get-started-btn {
+  background-color: #e50914;
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  font-size: 18px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.get-started-btn:hover {
+  background-color: #f40612;
+}
+
+/* Auth Container Styles */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-form {
+  background-color: rgba(0, 0, 0, 0.85);
+  padding: 60px 68px 40px;
+  border-radius: 4px;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.7);
+}
+
+.auth-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 28px;
+  color: #ffffff;
+}
+
+.form-group {
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.form-input {
+  width: 100%;
+  height: 50px;
+  background-color: #333333;
+  border: none;
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 16px;
+  padding: 16px 20px 0;
+  outline: none;
+  transition: background-color 0.3s, border 0.3s;
+}
+
+.form-input:focus {
+  background-color: #454545;
+}
+
+.form-input-error {
+  border: 2px solid #e50914 !important;
+  background-color: #333333 !important;
+}
+
+.form-input-error:focus {
+  background-color: #454545 !important;
+  border: 2px solid #e50914 !important;
+}
+
+.form-input::placeholder {
+  color: #8c8c8c;
+}
+
+.form-label {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8c8c8c;
+  font-size: 16px;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+.form-input:focus + .form-label,
+.form-input:not(:placeholder-shown) + .form-label {
+  top: 8px;
+  font-size: 11px;
+  color: #8c8c8c;
+}
+
+.error-message {
+  color: #e50914;
+  font-size: 13px;
+  margin-top: 6px;
+  min-height: 18px;
+  font-weight: 500;
+}
+
+.auth-button {
+  width: 100%;
+  height: 48px;
+  background-color: #e50914;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  margin: 24px 0 12px;
+  transition: background-color 0.3s;
+}
+
+.auth-button:hover {
+  background-color: #f40612;
+}
+
+.auth-button:disabled {
+  background-color: #333333;
+  cursor: not-allowed;
+}
+
+.auth-link {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.auth-link a {
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.auth-link a:hover {
+  text-decoration: underline;
+}
+
+.success-message {
+  color: #46d369;
+  font-size: 13px;
+  margin-top: 6px;
+  text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 15px 20px;
+  }
+  
+  .netflix-logo {
+    font-size: 24px;
+  }
+  
+  .hero-title {
+    font-size: 32px;
+  }
+  
+  .hero-subtitle {
+    font-size: 18px;
+  }
+  
+  .auth-form {
+    padding: 40px 28px;
+    margin: 20px;
+  }
+}
