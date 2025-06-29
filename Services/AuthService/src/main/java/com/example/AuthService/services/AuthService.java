@@ -15,56 +15,57 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-public class AuthServiceImpl{
+public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final SecurityTokenGenerator tokenGenerator;
 
 
-    public AuthServiceImpl(UserRepository userRepository, SecurityTokenGenerator tokenGenerator, PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository, SecurityTokenGenerator tokenGenerator, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.tokenGenerator = tokenGenerator;
         this.passwordEncoder = passwordEncoder;
     }
 
     public ResponseEntity<Response> signup(User user, String confirmPassword) throws UserAlreadyExistsException, PasswordMismatchException {
-        Response response = new Response();
-        // Checks if User with the username already exists
-        if (user != null) {
-            Optional<User> existingUser = userRepository.findByUsername(user.getUsername());
-            if (existingUser.isPresent() && !existingUser.get().getUsername().equals(user.getUsername())) {
-                throw new UserAlreadyExistsException();
-            }
+
+        // Check if user with username or email already exists
+        if (userRepository.existsByUsername(user.getUsername())) {
+            throw new UserAlreadyExistsException("Username " + user.getUsername() + " is already taken");
+        }
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new UserAlreadyExistsException("User with email " + user.getEmail() + " already exists");
         }
 
-        // Checks if user with email already exists
-//        if (user != null && userRepository.findByEmail(user.getEmail())) {
-//            throw new UserAlreadyExistsException();
-//        }
-
         // Check password confirmation
-        if (user != null && !user.getPassword().equals(confirmPassword)) {
-            throw new PasswordMismatchException();
+        if (!user.getPassword().equals(confirmPassword)) {
+            throw new PasswordMismatchException("Password and confirm password do not match");
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(user);
+
+        Response response = new Response();
         response.setMessage("User Registered Successfully");
         response.setUser(savedUser);
         return ResponseEntity.ok(response);
     }
 
     public ResponseEntity<Response> login(String email, String password) throws InvalidCredentialsException, UserNotFoundException, UserAlreadyExistsException {
-        Response response = new Response();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(UserNotFoundException::new);
+        Optional<User> userOpt = userRepository.findByEmail(email);
 
+        if(userOpt.isEmpty()) {
+            throw new UserNotFoundException("User with the email " + email + " not found");
+        }
+
+        User user = userOpt.get();
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new InvalidCredentialsException();
+            throw new InvalidCredentialsException("Password is incorrect");
         }
 
         String token = tokenGenerator.createToken(user);
+        Response response = new Response();
         response.setMessage("Login successful");
         response.setToken(token);
 
