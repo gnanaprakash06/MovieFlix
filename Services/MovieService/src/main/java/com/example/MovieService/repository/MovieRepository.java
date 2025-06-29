@@ -11,6 +11,7 @@ import java.util.Optional;
 public interface MovieRepository extends MongoRepository<User,String > {
 
     Optional<User> findByEmail(String email);
+
     List<User> findAllByEmail(String email);
 
 }
