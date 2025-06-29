@@ -20,6 +20,7 @@
     <modules>
         <module>MovieService</module>
         <module>AuthService</module>
+        <module>MovieService</module>
     </modules>
 
     <properties>
