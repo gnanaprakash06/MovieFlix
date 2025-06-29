@@ -28,6 +28,11 @@ public class AuthExceptionHandler {
         return createErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(AuthServiceException.class)
+    public ResponseEntity<Response> handleAuthServiceException(Exception ex) {
+        return createErrorResponse(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     private ResponseEntity<Response> createErrorResponse(String message, HttpStatus status) {
         Response response = new Response();
         response.setError(message);
