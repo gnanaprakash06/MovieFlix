@@ -6,7 +6,7 @@ import com.example.AuthService.exception.InvalidCredentialsException;
 import com.example.AuthService.exception.PasswordMismatchException;
 import com.example.AuthService.exception.UserAlreadyExistsException;
 import com.example.AuthService.exception.UserNotFoundException;
-import com.example.AuthService.services.AuthServiceImpl;
+import com.example.AuthService.services.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,10 +17,10 @@ import java.util.Map;
 @RequestMapping("api/auth")
 public class AuthController {
 
-    private final AuthServiceImpl authServiceImpl;
+    private final AuthService authService;
 
-    public AuthController(AuthServiceImpl authServiceImpl) {
-        this.authServiceImpl = authServiceImpl;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
     @PostMapping("/signup")
@@ -32,7 +32,7 @@ public class AuthController {
         String confirmPassword = request.get("confirmPassword");
 
         User user = new User(username, email, phoneNumber, password);
-        return authServiceImpl.signup(user, confirmPassword);
+        return authService.signup(user, confirmPassword);
 
     }
 
@@ -41,6 +41,6 @@ public class AuthController {
         String email = request.get("email");
         String password = request.get("password");
 
-        return authServiceImpl.login(email, password);
+        return authService.login(email, password);
     }
 }
