@@ -1,5 +1,6 @@
 package com.example.AuthService.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,6 +24,7 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String phoneNumber;
 
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
 
