@@ -9,7 +9,7 @@ const Home = ({ onNavigate }) => {
           className="netflix-logo"
           style={{ cursor: 'pointer' }}
         >
-          NETFLIX
+          MovieFlix
         </div>
         <div 
           onClick={() => onNavigate('signin')} 
