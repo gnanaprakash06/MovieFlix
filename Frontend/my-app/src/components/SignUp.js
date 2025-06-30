@@ -1,227 +1,136 @@
 import React, { useState } from 'react';
-import { validateEmail, validatePassword, validateUsername, validatePhoneNumber } from '../utils/validation';
+import { validateEmail, validatePassword, validateUsername } from '../utils/validation';
 import { signUpUser } from '../services/authService';
+import '../App.css';
 
 const SignUp = ({ onNavigate }) => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
-    phoneNumber: '',
     password: '',
     confirmPassword: ''
   });
-  
   const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  const handleChange = (e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-    
-    // Real-time validation
-    const newErrors = { ...errors };
-    
-    if (name === 'username') {
-      const usernameError = validateUsername(value);
-      if (usernameError) {
-        newErrors.username = usernameError;
-      } else {
-        delete newErrors.username;
-      }
-    }
-    
-    if (name === 'email') {
-      const emailError = validateEmail(value);
-      if (emailError) {
-        newErrors.email = emailError;
-      } else {
-        delete newErrors.email;
-      }
-    }
-    
-    if (name === 'phoneNumber') {
-      const phoneError = validatePhoneNumber(value);
-      if (phoneError) {
-        newErrors.phoneNumber = phoneError;
-      } else {
-        delete newErrors.phoneNumber;
-      }
-    }
-    
-    if (name === 'password') {
-      const passwordError = validatePassword(value);
-      if (passwordError) {
-        newErrors.password = passwordError;
-      } else {
-        delete newErrors.password;
-      }
-      
-      // Also check confirm password if it exists
-      if (formData.confirmPassword && value !== formData.confirmPassword) {
-        newErrors.confirmPassword = 'Passwords do not match';
-      } else if (formData.confirmPassword && value === formData.confirmPassword) {
-        delete newErrors.confirmPassword;
-      }
-    }
-    
-    if (name === 'confirmPassword') {
-      if (formData.password !== value) {
-        newErrors.confirmPassword = 'Passwords do not match';
-      } else {
-        delete newErrors.confirmPassword;
-      }
-    }
-    
-    setErrors(newErrors);
+    setErrors(prev => ({
+      ...prev,
+      [name]: null
+    }));
+    setServerError('');
   };
 
   const validateForm = () => {
     const newErrors = {};
-    
-    // Username validation
     const usernameError = validateUsername(formData.username);
-    if (usernameError) newErrors.username = usernameError;
-    
-    // Email validation
     const emailError = validateEmail(formData.email);
-    if (emailError) newErrors.email = emailError;
-    
-    // Phone number validation
-    const phoneError = validatePhoneNumber(formData.phoneNumber);
-    if (phoneError) newErrors.phoneNumber = phoneError;
-    
-    // Password validation
     const passwordError = validatePassword(formData.password);
-    if (passwordError) newErrors.password = passwordError;
-    
-    // Confirm password validation
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+
+    if (usernameError) newErrors.username = usernameError;
+    if (emailError) newErrors.email = emailError;
+    if (passwordError) newErrors.password = passwordError;
+
+    return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
+    const newErrors = validateForm();
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
-    
-    setIsLoading(true);
-    setSuccessMessage('');
-    
+
     try {
-      const response = await signUpUser(formData);
+      const response = await signUpUser({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword
+      });
       setSuccessMessage('Account created successfully! Redirecting to sign in...');
-      
       setTimeout(() => {
         onNavigate('signin');
       }, 2000);
-      
     } catch (error) {
-      setErrors({
-        submit: error.message || 'Something went wrong. Please try again.'
-      });
-    } finally {
-      setIsLoading(false);
+      setServerError(error.message);
     }
   };
 
   return (
     <div className="auth-container">
       <form className="auth-form" onSubmit={handleSubmit}>
-        <h1 className="auth-title">Sign Up</h1>
-        
+        <h2 className="auth-title">Sign Up</h2>
         <div className="form-group">
           <input
             type="text"
             name="username"
+            value={formData.username}
+            onChange={handleInputChange}
             className={`form-input ${errors.username ? 'form-input-error' : ''}`}
             placeholder=" "
-            value={formData.username}
-            onChange={handleChange}
-            required
           />
           <label className="form-label">Username</label>
           {errors.username && <div className="error-message">{errors.username}</div>}
         </div>
-
         <div className="form-group">
           <input
             type="email"
             name="email"
+            value={formData.email}
+            onChange={handleInputChange}
             className={`form-input ${errors.email ? 'form-input-error' : ''}`}
             placeholder=" "
-            value={formData.email}
-            onChange={handleChange}
-            required
           />
           <label className="form-label">Email</label>
           {errors.email && <div className="error-message">{errors.email}</div>}
         </div>
-
-        <div className="form-group">
-          <input
-            type="tel"
-            name="phoneNumber"
-            className={`form-input ${errors.phoneNumber ? 'form-input-error' : ''}`}
-            placeholder=" "
-            value={formData.phoneNumber}
-            onChange={handleChange}
-            required
-          />
-          <label className="form-label">Phone Number</label>
-          {errors.phoneNumber && <div className="error-message">{errors.phoneNumber}</div>}
-        </div>
-
         <div className="form-group">
           <input
             type="password"
             name="password"
+            value={formData.password}
+            onChange={handleInputChange}
             className={`form-input ${errors.password ? 'form-input-error' : ''}`}
             placeholder=" "
-            value={formData.password}
-            onChange={handleChange}
-            required
           />
           <label className="form-label">Password</label>
           {errors.password && <div className="error-message">{errors.password}</div>}
         </div>
-
         <div className="form-group">
           <input
             type="password"
             name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleInputChange}
             className={`form-input ${errors.confirmPassword ? 'form-input-error' : ''}`}
             placeholder=" "
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
           />
           <label className="form-label">Confirm Password</label>
           {errors.confirmPassword && <div className="error-message">{errors.confirmPassword}</div>}
         </div>
-
-        {errors.submit && <div className="error-message">{errors.submit}</div>}
+        {serverError && <div className="error-message">{serverError}</div>}
         {successMessage && <div className="success-message">{successMessage}</div>}
-
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           className="auth-button"
-          disabled={isLoading}
+          disabled={Object.keys(errors).length > 0}
         >
-          {isLoading ? 'Creating Account...' : 'Sign Up'}
+          Sign Up
         </button>
-
         <div className="auth-link">
-          Already have an account? <span onClick={() => onNavigate('signin')} style={{ color: '#ffffff', cursor: 'pointer', textDecoration: 'underline' }}>Sign in now</span>
+          Already have an account? <a href="#" onClick={() => onNavigate('signin')}>Sign in now</a>
         </div>
       </form>
     </div>

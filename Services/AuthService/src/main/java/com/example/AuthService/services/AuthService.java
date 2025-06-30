@@ -21,7 +21,6 @@ public class AuthService {
     private final EmailService emailService;
     private final OTPService otpService;
 
-
     public AuthService(UserRepository userRepository, SecurityTokenGenerator tokenGenerator, PasswordEncoder passwordEncoder, EmailService emailService, OTPService otpService) {
         this.userRepository = userRepository;
         this.tokenGenerator = tokenGenerator;
@@ -31,8 +30,6 @@ public class AuthService {
     }
 
     public ResponseEntity<Response> signup(User user, String confirmPassword) throws UserAlreadyExistsException, PasswordMismatchException {
-
-        // Check if user with username or email already exists
         if (userRepository.existsByUsername(user.getUsername())) {
             throw new UserAlreadyExistsException("Username " + user.getUsername() + " is already taken");
         }
@@ -40,7 +37,6 @@ public class AuthService {
             throw new UserAlreadyExistsException("User with email " + user.getEmail() + " already exists");
         }
 
-        // Check password confirmation
         if (!user.getPassword().equals(confirmPassword)) {
             throw new PasswordMismatchException("Password and confirm password do not match");
         }
@@ -57,7 +53,7 @@ public class AuthService {
     public ResponseEntity<Response> login(String email, String password) throws InvalidCredentialsException, UserNotFoundException, UserAlreadyExistsException {
         Optional<User> userOpt = userRepository.findByEmail(email);
 
-        if(userOpt.isEmpty()) {
+        if (userOpt.isEmpty()) {
             throw new UserNotFoundException("User with the email " + email + " not found");
         }
 
@@ -74,7 +70,6 @@ public class AuthService {
         return ResponseEntity.ok(response);
     }
 
-    // For forgot password flow - Step 1: Send OTP to user's email
     public ResponseEntity<Response> initiatePasswordReset(String email) throws UserNotFoundException, AuthServiceException {
         Response response = new Response();
 
@@ -93,11 +88,9 @@ public class AuthService {
         }
     }
 
-    // For forgot password flow - Step 2: Verify OTP and reset password
     public ResponseEntity<Response> resetPassword(String email, String otp, String newPassword, String confirmPassword) throws PasswordMismatchException, UserNotFoundException, AuthServiceException {
         Response response = new Response();
 
-        // Validate OTP first
         if (!otpService.validateOTP(email, otp)) {
             response.setError("Invalid or expired OTP");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
@@ -110,22 +103,18 @@ public class AuthService {
 
         User user = userOpt.get();
 
-        // Check password confirmation
         if (!newPassword.equals(confirmPassword)) {
             throw new PasswordMismatchException("New password and confirm password do not match");
         }
 
-        // Check if new password is same as old password
         if (passwordEncoder.matches(newPassword, user.getPassword())) {
-//            response.setError("New password cannot be the same as the old password");
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
             throw new PasswordMismatchException("New password cannot be the same as the old password");
         }
 
         try {
             user.setPassword(passwordEncoder.encode(newPassword));
             userRepository.save(user);
-            otpService.clearOTP(email); // Clear the OTP after successful reset
+            otpService.clearOTP(email);
 
             response.setMessage("Password reset successfully");
             return ResponseEntity.ok(response);
@@ -133,5 +122,4 @@ public class AuthService {
             throw new AuthServiceException("Failed to reset password: " + e.getMessage(), e);
         }
     }
-
 }

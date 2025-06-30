@@ -24,17 +24,16 @@ public class MovieController {
     private final UserAuthClient userAuthClient;
     private final MovieService movieService;
 
-    public MovieController(UserAuthClient userAuthClient, MovieService movieService){
+    public MovieController(UserAuthClient userAuthClient, MovieService movieService) {
         this.userAuthClient = userAuthClient;
         this.movieService = movieService;
     }
 
     @PostMapping(value = "/signup", consumes = {"multipart/form-data"})
     public ResponseEntity<?> registerUser(@RequestParam("users") @Valid User user,
-                                          @RequestPart(value = "profileImage", required = false)
-                                          MultipartFile profileImage){
+                                          @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
         try {
-            if (profileImage != null && !profileImage.isEmpty()){
+            if (profileImage != null && !profileImage.isEmpty()) {
                 user.setProfileImage(profileImage.getBytes());
             }
             UserDTO authUser = new UserDTO();
@@ -43,26 +42,24 @@ public class MovieController {
             userAuthClient.registerUser(authUser);
             movieService.registerUser(user);
             return ResponseEntity.ok(user);
-        }catch (UserAlreadyExistsException e){
+        } catch (UserAlreadyExistsException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (IOException e){
+        } catch (IOException e) {
             return ResponseEntity.badRequest().body("Error processing image: " + e.getMessage());
-        }catch (MaxUploadSizeExceededException e){
+        } catch (MaxUploadSizeExceededException e) {
             return ResponseEntity.badRequest().body("File size exceeds limit (10MB)");
         }
     }
 
     @GetMapping("/users/{email}/profile")
-    public ResponseEntity<?> getProfileData(@PathVariable String email){
-
+    public ResponseEntity<?> getProfileData(@PathVariable String email) {
         Optional<User> userOptional = movieService.findByEmail(email);
-        if (userOptional.isPresent()){
+        if (userOptional.isPresent()) {
             User user = userOptional.get();
             Map<String, Object> response = new HashMap<>();
             response.put("name", user.getUsername());
-//            response.put("phoneNum", user.getPhoneNum());
             response.put("email", user.getEmail());
-            if (user.getProfileImage() != null && user.getProfileImage().length > 0){
+            if (user.getProfileImage() != null && user.getProfileImage().length > 0) {
                 String base64Image = Base64.getEncoder().encodeToString(user.getProfileImage());
                 response.put("profileImage", base64Image);
                 System.out.println("Returning profile data for " + email + ", image size: " + user.getProfileImage().length);
@@ -82,6 +79,7 @@ public class MovieController {
     @PutMapping(value = "/users/{email}/profile", consumes = {"multipart/form-data"})
     public ResponseEntity<String> updateProfile(
             @PathVariable String email,
+            @RequestParam(value = "username", required = false) String username,
             @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
             @RequestParam(value = "removeImage", required = false) String removeImage) {
         try {
@@ -91,6 +89,9 @@ public class MovieController {
             }
 
             User existingUser = userOptional.get();
+            if (username != null && !username.trim().isEmpty()) {
+                existingUser.setUsername(username);
+            }
 
             if ("true".equals(removeImage)) {
                 existingUser.setProfileImage(null);
@@ -112,30 +113,27 @@ public class MovieController {
     }
 
     @GetMapping("/popular")
-    public ResponseEntity<List<Map<String,Object>>> getPopularMovies(){
-
+    public ResponseEntity<List<Map<String,Object>>> getPopularMovies() {
         List<Map<String, Object>> movies = movieService.fetchPopularMovies();
-        if (movies != null && !movies.isEmpty()){
+        if (movies != null && !movies.isEmpty()) {
             return ResponseEntity.ok(movies);
         }
         return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Map<String,Object>>> getMovies(@RequestParam String title){
-
+    public ResponseEntity<List<Map<String,Object>>> getMovies(@RequestParam String title) {
         List<Map<String, Object>> movies = movieService.fetchMoviesFromTmdb(title);
-        if (movies != null && !movies.isEmpty()){
+        if (movies != null && !movies.isEmpty()) {
             return ResponseEntity.ok(movies);
         }
         return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/user/{email}/favorites")
-    public ResponseEntity<List<Map<String,Object>>> getUserFavorites(@PathVariable String email){
-
+    public ResponseEntity<List<Map<String,Object>>> getUserFavorites(@PathVariable String email) {
         Optional<User> userOptional = movieService.findByEmail(email);
-        if (userOptional.isPresent()){
+        if (userOptional.isPresent()) {
             User user = userOptional.get();
             List<Map<String, Object>> favorites = user.getFavorites() != null ? user.getFavorites() : new ArrayList<>();
             return ResponseEntity.ok(favorites);
@@ -144,10 +142,9 @@ public class MovieController {
     }
 
     @PostMapping("/user/{email}/favorites")
-    public ResponseEntity<String> addMovieToFavorites(@PathVariable String email, @RequestBody Map<String, Object> movie){
-
+    public ResponseEntity<String> addMovieToFavorites(@PathVariable String email, @RequestBody Map<String, Object> movie) {
         Optional<User> userOptional = movieService.findByEmail(email);
-        if (!userOptional.isPresent()){
+        if (!userOptional.isPresent()) {
             return ResponseEntity.status(404).body("User not found with email: " + email);
         }
 
@@ -187,12 +184,11 @@ public class MovieController {
     @GetMapping("/content/genre")
     public ResponseEntity<List<Map<String, Object>>> getContentByGenre(
             @RequestParam String genreId,
-            @RequestParam String type) { // "movie" or "tv"
+            @RequestParam String type) {
         List<Map<String, Object>> content = movieService.fetchMoviesByGenre(genreId, type);
         if (content != null && !content.isEmpty()) {
             return ResponseEntity.ok(content);
         }
         return ResponseEntity.notFound().build();
     }
-
 }

@@ -20,10 +20,8 @@ public class User {
     private byte[] profileImage;
     private List<Map<String, Object>> favorites;
 
-    //Default Constructor
-    public User(){}
+    public User() {}
 
-    //Parameterized Constructor
     public User(String id, String username, String email, String password, byte[] profileImage) {
         this.id = id;
         this.username = username;
@@ -32,7 +30,6 @@ public class User {
         this.profileImage = profileImage;
     }
 
-    //Getters and Setters
     public String getId() {
         return id;
     }

@@ -10,13 +10,10 @@ body {
   color: #ffffff;
 }
 
-/* Home Page Styles */
-/* Add this to your existing App.css */
 .home-container {
   min-height: 100vh;
-  background:
-              url('./image/netflix-background.jpeg') 
-              center/cover no-repeat;}
+  background: url('./image/netflix-background.jpeg') center/cover no-repeat;
+}
 
 .navbar {
   display: flex;
@@ -87,11 +84,8 @@ body {
   background-color: #f40612;
 }
 
-/* Auth Container Styles */
 .auth-container {
-  background:
-              url('./image/netflix-background.jpeg') 
-              center/cover no-repeat;
+  background: url('./image/netflix-background.jpeg') center/cover no-repeat;
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -99,7 +93,7 @@ body {
 }
 
 .auth-form {
-  background-color: rgba(0, 0, 0, 0.85); 
+  background-color: rgba(0, 0, 0, 0.85);
   padding: 60px 68px 40px;
   border-radius: 4px;
   width: 100%;
@@ -220,7 +214,18 @@ body {
   text-align: center;
 }
 
-/* Responsive Design */
+.success-dialog {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #28a745;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  z-index: 1001;
+}
+
 @media (max-width: 768px) {
   .navbar {
     padding: 15px 20px;
@@ -243,6 +248,3 @@ body {
     margin: 20px;
   }
 }
-
-
-

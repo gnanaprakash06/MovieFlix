@@ -3,8 +3,8 @@ import '../App.css';
 
 const EditProfile = ({ userEmail, userProfile, onClose }) => {
   const [formData, setFormData] = useState({
-    name: userProfile?.name || '',
-    email: userProfile?.email || ''
+    username: userProfile?.name || '',
+    email: userProfile?.email || userEmail || ''
   });
   const [profileImage, setProfileImage] = useState(null);
   const [previewImage, setPreviewImage] = useState(
@@ -38,6 +38,7 @@ const EditProfile = ({ userEmail, userProfile, onClose }) => {
     
     try {
       const formDataToSend = new FormData();
+      formDataToSend.append('username', formData.username);
       if (profileImage) {
         formDataToSend.append('profileImage', profileImage);
       }
@@ -99,10 +100,9 @@ const EditProfile = ({ userEmail, userProfile, onClose }) => {
             <label>Username</label>
             <input
               type="text"
-              name="name"
-              value={formData.name}
+              name="username"
+              value={formData.username}
               onChange={handleInputChange}
-              readOnly
             />
           </div>
 
@@ -112,7 +112,6 @@ const EditProfile = ({ userEmail, userProfile, onClose }) => {
               type="email"
               name="email"
               value={formData.email}
-              onChange={handleInputChange}
               readOnly
             />
           </div>

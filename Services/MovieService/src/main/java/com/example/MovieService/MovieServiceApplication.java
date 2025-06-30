@@ -22,6 +22,7 @@ public class MovieServiceApplication {
 
         SpringApplication.run(MovieServiceApplication.class);
 
+
     }
 
     @Bean

@@ -50,17 +50,14 @@ export const signInUser = async (credentials) => {
   }
 };
 
-// Check if user is authenticated
 export const isAuthenticated = () => {
   return window.authToken !== undefined;
 };
 
-// Get current user token
 export const getAuthToken = () => {
   return window.authToken;
 };
 
-// Logout user
 export const logout = () => {
   delete window.authToken;
   delete window.userEmail;

@@ -24,13 +24,11 @@ public class AuthController {
     public ResponseEntity<Response> signup(@RequestBody Map<String, String> request) throws PasswordMismatchException, UserAlreadyExistsException {
         String username = request.get("username");
         String email = request.get("email");
-        String phoneNumber = request.get("phoneNumber");
         String password = request.get("password");
         String confirmPassword = request.get("confirmPassword");
 
-        User user = new User(username, email, phoneNumber, password);
+        User user = new User(username, email, password);
         return authService.signup(user, confirmPassword);
-
     }
 
     @PostMapping("/login")
@@ -42,7 +40,7 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<Response> forgotPassword(@RequestBody Map<String, String> request) throws UserNotFoundException, AuthServiceException, AuthServiceException {
+    public ResponseEntity<Response> forgotPassword(@RequestBody Map<String, String> request) throws UserNotFoundException, AuthServiceException {
         String email = request.get("email");
 
         Response response = new Response();
@@ -63,7 +61,6 @@ public class AuthController {
 
         Response response = new Response();
 
-        // Validate required fields
         if (email == null || email.trim().isEmpty()) {
             response.setError("Email is required");
             return ResponseEntity.status(400).body(response);
@@ -86,5 +83,4 @@ public class AuthController {
 
         return authService.resetPassword(email, otp, newPassword, confirmPassword);
     }
-
 }
