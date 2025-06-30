@@ -89,6 +89,9 @@ body {
 
 /* Auth Container Styles */
 .auth-container {
+  background:
+              url('./image/netflix-background.jpeg') 
+              center/cover no-repeat;
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -96,7 +99,7 @@ body {
 }
 
 .auth-form {
-  background-color: rgba(0, 0, 0, 0.85);
+  background-color: rgba(0, 0, 0, 0.85); 
   padding: 60px 68px 40px;
   border-radius: 4px;
   width: 100%;
