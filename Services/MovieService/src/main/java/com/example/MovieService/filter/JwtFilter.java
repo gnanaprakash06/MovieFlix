@@ -12,6 +12,7 @@ import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
 
+
 public class JwtFilter extends GenericFilterBean {
 
 public void doFilter (ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
