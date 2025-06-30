@@ -12,44 +12,40 @@ import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
 
-
 public class JwtFilter extends GenericFilterBean {
+    @Override
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+            throws IOException, ServletException {
+        HttpServletRequest request = (HttpServletRequest) servletRequest;
+        HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-public void doFilter (ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
-                        throws IOException, ServletException {
+        String path = request.getRequestURI();
 
-    HttpServletRequest request =(HttpServletRequest)servletRequest;
-    HttpServletResponse response = (HttpServletResponse) servletResponse;
+        // Allow signup, login, and OPTIONS requests to bypass JWT validation
+        if (path.contains("/signup") || path.contains("/login") || request.getMethod().equals("OPTIONS")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-    String path =request.getRequestURI(); // Get the request URL
+        final String authHeader = request.getHeader("Authorization");
 
-    // Enforce filter security in JWT Validation of Signup & Login
-    if (path.contains("/signup") || path.contains("/login")) {
-        filterChain.doFilter(request, response);
-        return;
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Missing or invalid Authorization header");
+            return;
+        }
+
+        try {
+            String token = authHeader.substring(7); // Remove "Bearer "
+            Claims claims = Jwts.parser()
+                    .setSigningKey("secretKey")
+                    .parseClaimsJws(token)
+                    .getBody();
+            request.setAttribute("claims", claims);
+            filterChain.doFilter(request, response);
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Invalid token");
+        }
     }
-
-    final String authHeader =request.getHeader("Authorization");
-
-    if (request.getMethod().equals("OPTIONS")) {
-        response.setStatus(HttpServletResponse.SC_OK);
-        filterChain.doFilter(request, response);
-        return;
-    }
-
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-        throw new ServletException("Missing or Invalid Token");
-    }
-
-    String token = authHeader.substring(7); // Remove the prefix "Bearer "
-
-    Claims claims = Jwts.parser()
-            .setSigningKey("secretKey")  // Ensure this matches the secret used for signing
-            .parseClaimsJws(token)
-            .getBody();
-
-    request.setAttribute("claims", claims);
-
-    filterChain.doFilter(request, response);
-}
 }

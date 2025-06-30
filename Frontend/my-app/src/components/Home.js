@@ -1,5 +1,4 @@
 import React from 'react';
-
 const Home = ({ onNavigate }) => {
   return (
     <div className="home-container">

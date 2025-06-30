@@ -1,0 +1,376 @@
+/* MovieService.css */
+.movie-service-container {
+  min-height: 100vh;
+  background-color: #141414;
+  color: white;
+}
+
+.movie-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 50px;
+  background-color: #000000;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-left .netflix-logo {
+  color: #e50914;
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.username {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.profile-image-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-menu-container {
+  position: relative;
+}
+
+.profile-icon {
+  width: 35px;
+  height: 35px;
+  background-color: #333;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #333;
+  border-radius: 5px;
+  padding: 10px 0;
+  min-width: 150px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.dropdown-item {
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.dropdown-item:hover {
+  background-color: #555;
+}
+
+.movie-content {
+  padding: 20px 50px;
+}
+
+.movie-category {
+  margin-bottom: 40px;
+}
+
+.category-title {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: white;
+}
+
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.movie-card {
+  background-color: #1a1a1a;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.movie-card:hover {
+  transform: scale(1.05);
+}
+
+.movie-poster {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+}
+
+.movie-info {
+  padding: 15px;
+}
+
+.movie-title {
+  font-size: 1rem;
+  margin: 0 0 8px 0;
+  color: white;
+}
+
+.movie-rating {
+  margin: 0;
+  color: #ffd700;
+  font-size: 0.9rem;
+}
+
+/* EditProfile.css */
+.edit-profile-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.edit-profile-container {
+  background-color: #333;
+  border-radius: 10px;
+  padding: 30px;
+  width: 500px;
+  max-width: 90vw;
+  color: white;
+  position: relative;
+}
+
+.edit-profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.edit-profile-header h2 {
+  margin: 0;
+  color: white;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.profile-image-section {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.profile-image-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.profile-image-large {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #555;
+}
+
+.profile-placeholder {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #888;
+}
+
+.image-upload-btn {
+  background-color: #e50914;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.image-upload-btn:hover {
+  background-color: #b8070f;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: #ccc;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  background-color: #555;
+  border: 1px solid #666;
+  border-radius: 5px;
+  color: white;
+  font-size: 1rem;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #e50914;
+}
+
+.update-profile-btn {
+  width: 100%;
+  background-color: #e50914;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.update-profile-btn:hover {
+  background-color: #b8070f;
+}
+
+.success-dialog {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #28a745;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  z-index: 1001;
+}
+
+/* MovieDetails.css */
+.movie-details-container {
+  min-height: 100vh;
+  background-color: #141414;
+  color: white;
+  padding: 20px;
+}
+
+.back-button {
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 30px;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
+
+.back-button:hover {
+  background-color: #555;
+}
+
+.movie-details-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.trailer-section h2 {
+  margin-bottom: 20px;
+  color: white;
+}
+
+.trailer-iframe {
+  width: 100%;
+  height: 400px;
+  border: none;
+  border-radius: 10px;
+}
+
+.no-trailer {
+  width: 100%;
+  height: 400px;
+  background-color: #333;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+}
+
+.movie-info-section {
+  background-color: #1a1a1a;
+  padding: 30px;
+  border-radius: 10px;
+  height: fit-content;
+}
+
+.movie-details-info h3 {
+  margin-bottom: 20px;
+  color: #e50914;
+}
+
+.info-item {
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.info-item strong {
+  color: #ccc;
+  display: inline-block;
+  width: 120px;
+}
+
+.overview-text {
+  margin-top: 10px;
+  line-height: 1.6;
+  color: #ddd;
+}
+
+@media (max-width: 768px) {
+  .movie-details-content {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .trailer-iframe {
+    height: 250px;
+  }
+  
+  .movie-details-container {
+    padding: 10px;
+  }
+}

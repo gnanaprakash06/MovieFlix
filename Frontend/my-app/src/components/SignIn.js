@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { validateEmail } from '../utils/validation';
 import { signInUser } from '../services/authService';
 
 const SignIn = ({ onNavigate }) => {
@@ -7,7 +6,6 @@ const SignIn = ({ onNavigate }) => {
     email: '',
     password: ''
   });
-  
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -18,67 +16,31 @@ const SignIn = ({ onNavigate }) => {
       [name]: value
     }));
     
-    // Real-time validation
-    const newErrors = { ...errors };
-    
-    if (name === 'email') {
-      const emailError = validateEmail(value);
-      if (emailError) {
-        newErrors.email = emailError;
-      } else {
-        delete newErrors.email;
-      }
+    // Clear errors when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
     }
-    
-    if (name === 'password') {
-      if (!value.trim()) {
-        newErrors.password = 'Password is required';
-      } else {
-        delete newErrors.password;
-      }
-    }
-    
-    setErrors(newErrors);
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    
-    // Email validation
-    const emailError = validateEmail(formData.email);
-    if (emailError) newErrors.email = emailError;
-    
-    // Password validation
-    if (!formData.password.trim()) {
-      newErrors.password = 'Password is required';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-    
     setIsLoading(true);
-    
+    setErrors({});
+
     try {
       const response = await signInUser(formData);
-      
-      window.authToken = response.token;
-      window.userEmail = formData.email;
-      
-    
-      alert('Login successful!');
-      onNavigate('home');
-      
+     if (response.token) {
+  window.authToken = response.token;
+  window.userEmail = formData.email;
+  console.log('Token set:', window.authToken);
+  onNavigate('movieservice');
+}
     } catch (error) {
       setErrors({
-        submit: error.message || 'Something went wrong. Please try again.'
+        submit: error.message || 'Failed to sign in'
       });
     } finally {
       setIsLoading(false);
