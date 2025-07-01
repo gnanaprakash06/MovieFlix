@@ -50,6 +50,51 @@ export const signInUser = async (credentials) => {
   }
 };
 
+export const initiatePasswordReset = async (email) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to send OTP');
+    }
+  } catch (error) {
+    console.error('Error initiating password reset:', error);
+    throw error;
+  }
+};
+
+export const resetPassword = async (email, otp, newPassword, confirmPassword) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        otp,
+        newPassword,
+        confirmPassword
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to reset password');
+    }
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    throw error;
+  }
+};
+
 export const isAuthenticated = () => {
   return window.authToken !== undefined;
 };
