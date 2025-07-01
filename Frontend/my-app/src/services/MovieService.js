@@ -49,6 +49,12 @@ const MovieService = ({ userEmail, onNavigate }) => {
     }
   };
 
+  // Filter function to remove movies with vote count less than 10
+  const filterMoviesByVoteCount = (movies, minVoteCount = 10) => {
+    if (!Array.isArray(movies)) return [];
+    return movies.filter(movie => movie.vote_count >= minVoteCount);
+  };
+
   const fetchMovieCategories = async (retryCount = 0) => {
     try {
       const token = getAuthToken();
@@ -99,11 +105,12 @@ const MovieService = ({ userEmail, onNavigate }) => {
         2
       );
 
+      // Filter movies by vote count before setting state
       setMovies({
-        popular: popularData || [],
-        horror: horrorData || [],
-        comedy: comedyData || [],
-        action: actionData || []
+        popular: filterMoviesByVoteCount(popularData),
+        horror: filterMoviesByVoteCount(horrorData),
+        comedy: filterMoviesByVoteCount(comedyData),
+        action: filterMoviesByVoteCount(actionData)
       });
       setError(null);
     } catch (error) {
@@ -140,7 +147,6 @@ const MovieService = ({ userEmail, onNavigate }) => {
               />
               <div className="movie-info">
                 <h3 className="movie-title">{movie.title || movie.name}</h3>
-                <p className="movie-rating">⭐ {movie.vote_average}/10</p>
               </div>
             </div>
           ))
