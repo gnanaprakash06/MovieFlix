@@ -22,7 +22,7 @@ public class EmailService {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(fromEmail);
             message.setTo(toEmail);
-            message.setSubject("Password Reset OTP - Netflix Demo");
+            message.setSubject("Password Reset OTP - MovieFlix");
             message.setText(buildOTPEmailBody(otp));
 
             emailSender.send(message);
