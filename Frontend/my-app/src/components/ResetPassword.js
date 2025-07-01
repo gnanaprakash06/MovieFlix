@@ -65,6 +65,7 @@ const ResetPasswordForm = ({ email, onSuccess, onBack }) => {
               onChange={(e) => setNewPassword(e.target.value)}
               required
               minLength="6"
+              maxLength="8"
             />
           </div>
           
