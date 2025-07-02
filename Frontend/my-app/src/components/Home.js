@@ -5,7 +5,7 @@ const Home = ({ onNavigate }) => {
       <nav className="navbar">
         <div 
           onClick={() => onNavigate('home')} 
-          className="netflix-logo"
+          className="movieflix-logo"
           style={{ cursor: 'pointer' }}
         >
           MovieFlix

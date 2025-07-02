@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Home from './components/Home';
 import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
+import Footer from './components/Footer';
 import MovieService from './services/MovieService';
 import './App.css';
 
@@ -29,7 +30,13 @@ function App() {
 
   return (
     <div className="App">
-      {renderView()}
+
+            {renderView()}
+
+      {/* Conditionally render Footer - don't show on dashboard, login, or signup pages */}
+      {!['home', 'login', 'signup', 'signin'].includes(currentView) && <Footer />}
+      
+
     </div>
   );
 }

@@ -52,7 +52,7 @@ export const signInUser = async (credentials) => {
 
 export const initiatePasswordReset = async (email) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
+    const response = await fetch(`${API_BASE_URL}/forgot-password`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -60,19 +60,30 @@ export const initiatePasswordReset = async (email) => {
       body: JSON.stringify({ email }),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to send OTP');
+    const data = await response.json();  // Read the response body
+
+        if (!response.ok) {
+      throw new Error(data.error || 'Failed to send OTP');
     }
+
+    return data;  // Return response body to your React code
+
+    // if (!response.ok) {
+    //   const errorData = await response.json();
+    //   throw new Error(errorData.error || 'Failed to send OTP');
+    // }
   } catch (error) {
-    console.error('Error initiating password reset:', error);
+    // console.error('Error initiating password reset:', error);
+     if (error.message === 'Failed to fetch') {
+      throw new Error('Unable to connect to server. Please check your connection.');
+    }
     throw error;
   }
 };
 
 export const resetPassword = async (email, otp, newPassword, confirmPassword) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
+    const response = await fetch(`${API_BASE_URL}/reset-password`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -85,12 +96,24 @@ export const resetPassword = async (email, otp, newPassword, confirmPassword) =>
       }),
     });
 
+    // if (!response.ok) {
+    //   const errorData = await response.json();
+    //   throw new Error(errorData.error || 'Failed to reset password');
+    // }
+
+    const data = await response.json();  // Read response data
+
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to reset password');
+      throw new Error(data.error || 'Failed to reset password');
     }
+
+    return data;  // Return the response data
+
   } catch (error) {
-    console.error('Error resetting password:', error);
+    // console.error('Error resetting password:', error);
+     if (error.message === 'Failed to fetch') {
+      throw new Error('Unable to connect to server. Please check your connection.');
+    }
     throw error;
   }
 };

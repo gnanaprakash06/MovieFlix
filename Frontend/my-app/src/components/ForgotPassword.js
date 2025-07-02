@@ -5,20 +5,33 @@ const ForgotPasswordForm = ({ onOTPSent, onBack }) => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setSuccessMessage('');
 
     try {
-      await initiatePasswordReset(email);
-      onOTPSent(email);
+      const data = await initiatePasswordReset(email);  // Capture returned response
+      setSuccessMessage(data.message || `OTP sent to ${email}`);
+      // await initiatePasswordReset(email);
+      // onOTPSent(email);
+      // setSuccessMessage(`OTP sent to ${email}`);
+
+      // Delay the onOTPSent call to show success message first
+      setTimeout(() => {
+        onOTPSent(email);
+      }, 3000); // Show success message for 3 seconds before proceeding
+
     } catch (err) {
       setError(err.message || 'Failed to send OTP. Please try again.');
-    } finally {
-      setLoading(false);
+    setLoading(false);
     }
+      // } finally {
+    //   setLoading(false);
+    // }
   };
 
   return (
@@ -26,6 +39,7 @@ const ForgotPasswordForm = ({ onOTPSent, onBack }) => {
       <div className="auth-form">
         <h2>Forgot Password</h2>
         {error && <div className="error-message">{error}</div>}
+        {successMessage && <div className="success-message">{successMessage}</div>}
         
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -42,9 +56,9 @@ const ForgotPasswordForm = ({ onOTPSent, onBack }) => {
           <button 
             type="submit" 
             className="btn-submit"
-            disabled={loading}
+            disabled={loading || successMessage} // Disable button when success message is shown
           >
-            {loading ? 'Sending OTP...' : 'Send OTP'}
+            {successMessage ? 'Redirecting in 3 seconds...' : loading ? 'Sending OTP...' : 'Send OTP'/* {loading ? 'Sending OTP...' : successMessage ? 'OTP Sent!' : 'Send OTP'} */}
           </button>
         </form>
         
