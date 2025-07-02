@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { validateEmail, validatePassword } from '../utils/validation';
 import { signInUser } from '../services/authService';
 import '../App.css';
+import ForgotPasswordForm from './ForgotPassword';
 
 const SignIn = ({ onNavigate }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
+
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -19,6 +21,7 @@ const SignIn = ({ onNavigate }) => {
     newPassword: '',
     confirmPassword: ''
   });
+  const[forgotsuccess, setForgotSuccess] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
   const [resetError, setResetError] = useState('');
 
@@ -83,10 +86,15 @@ const SignIn = ({ onNavigate }) => {
         body: JSON.stringify({ email: forgotPasswordEmail })
       });
       const data = await response.json();
+
       if (response.ok) {
+        setForgotSuccess(true);
+        setTimeout(()=>{
+          setForgotSuccess(false);
         setShowForgotPassword(false);
         setShowResetPassword(true);
         setForgotPasswordError('');
+        },2000);
       } else {
         setForgotPasswordError(data.error || 'Failed to send OTP');
       }
@@ -102,7 +110,7 @@ const SignIn = ({ onNavigate }) => {
     const passwordError = validatePassword(resetFormData.newPassword);
     if (passwordError) newErrors.newPassword = passwordError;
     if (resetFormData.newPassword !== resetFormData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = 'Password does not match';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -174,9 +182,17 @@ const SignIn = ({ onNavigate }) => {
             {forgotPasswordError && <div className="error-message">{forgotPasswordError}</div>}
           </div>
           <button type="submit" className="auth-button">Send OTP</button>
+              
           <div className="auth-link">
             <a href="#" onClick={() => setShowForgotPassword(false)}>Back to Sign In</a>
           </div>
+          {forgotsuccess && (
+            <div className="success-dialog">
+              <div className="success-content">
+                <p>OTP sent to given email Id!</p>
+              </div>
+            </div>
+          )}
         </form>
       </div>
     );

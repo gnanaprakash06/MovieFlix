@@ -209,7 +209,7 @@ body {
 
 .success-message {
   color: #46d369;
-  font-size: 13px;
+  font-size: 15px;
   margin-top: 6px;
   text-align: center;
 }
@@ -231,7 +231,7 @@ body {
     padding: 15px 20px;
   }
   
-  .netflix-logo {
+  .movielix-logo {
     font-size: 24px;
   }
   
