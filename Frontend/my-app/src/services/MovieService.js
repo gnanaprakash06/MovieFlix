@@ -435,9 +435,6 @@ const MovieService = ({ userEmail, onNavigate }) => {
           {showProfileMenu && (
             <div className="profile-dropdown">
               <div className="dropdown-item" onClick={() => setShowEditProfile(true)}>
-                Your Account
-              </div>
-              <div className="dropdown-item" onClick={() => setShowEditProfile(true)}>
                 Edit Profile
               </div>
               <div className="dropdown-item" onClick={handleLogout}>

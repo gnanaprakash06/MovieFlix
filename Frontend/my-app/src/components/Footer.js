@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 
 const Footer = () => {
-  const [selectedLanguage, setSelectedLanguage] = useState('English');
-  const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
 
   const footerLinks = {
     'Company': [

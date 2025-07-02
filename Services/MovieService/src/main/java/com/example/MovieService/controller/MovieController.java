@@ -6,6 +6,8 @@ import com.example.MovieService.exception.UserAlreadyExistsException;
 import com.example.MovieService.feignClient.UserAuthClient;
 import com.example.MovieService.service.MovieService;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +25,7 @@ public class MovieController {
 
     private final UserAuthClient userAuthClient;
     private final MovieService movieService;
+    private static final Logger logger = LoggerFactory.getLogger(MovieController.class);
 
     public MovieController(UserAuthClient userAuthClient, MovieService movieService) {
         this.userAuthClient = userAuthClient;
@@ -156,6 +159,7 @@ public class MovieController {
             favorites.add(movie);
             user.setFavorites(favorites);
             movieService.updateUser(user);
+            logger.debug("test");
             return ResponseEntity.status(201).body("Movie added to favorites");
         }
         return ResponseEntity.ok("Movie already in favorites");
