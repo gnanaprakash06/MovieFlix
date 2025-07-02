@@ -16,6 +16,7 @@ const ForgotPasswordForm = ({ onOTPSent, onBack }) => {
     try {
       const data = await initiatePasswordReset(email);  // Capture returned response
       setSuccessMessage(data.message || `OTP sent to ${email}`);
+      console.log(data);
       // await initiatePasswordReset(email);
       // onOTPSent(email);
       // setSuccessMessage(`OTP sent to ${email}`);
@@ -24,7 +25,7 @@ const ForgotPasswordForm = ({ onOTPSent, onBack }) => {
       setTimeout(() => {
         onOTPSent(email);
       }, 3000); // Show success message for 3 seconds before proceeding
-
+      // console.log(data);
     } catch (err) {
       setError(err.message || 'Failed to send OTP. Please try again.');
     setLoading(false);
