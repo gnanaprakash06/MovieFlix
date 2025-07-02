@@ -125,7 +125,7 @@ const SignUp = ({ onNavigate }) => {
         <button
           type="submit"
           className="auth-button"
-          disabled={Object.keys(errors).length > 0}
+          disabled={Object.keys(errors).length < 0}
         >
           Sign Up
         </button>
