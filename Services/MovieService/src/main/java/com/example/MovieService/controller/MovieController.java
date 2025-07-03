@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -87,16 +88,16 @@ public class MovieController {
             if (user.getProfileImage() != null && user.getProfileImage().length > 0) {
                 String base64Image = Base64.getEncoder().encodeToString(user.getProfileImage());
                 response.put("profileImage", base64Image);
-                System.out.println("Returning profile data for " + email + ", image size: " + user.getProfileImage().length);
+                logger.debug("Returning profile data for {}, image size: {}", email, user.getProfileImage().length);
             } else {
                 response.put("profileImage", null);
-                System.out.println("No profile image found for: " + email);
+                logger.debug("No profile image found for: {}", email);
             }
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(response);
         } else {
-            System.out.println("User not found: " + email);
+            logger.debug("User not found: {}", email);
             return ResponseEntity.notFound().build();
         }
     }
@@ -108,27 +109,28 @@ public class MovieController {
             @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
             @RequestParam(value = "removeImage", required = false) String removeImage) {
         try {
-            Optional<User> userOptional = movieService.findByEmail(email);
-            if (!userOptional.isPresent()) {
-                return ResponseEntity.status(404).body("User not found with email: " + email);
+            Optional<User> userOpt = movieService.findByEmail(email);
+            if (userOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found with email: " + email);
             }
 
-            User existingUser = userOptional.get();
-            if (username != null && !username.trim().isEmpty()) {
+            User existingUser = userOpt.get();
+            if (username != null && !username.isBlank()) {
                 existingUser.setUsername(username);
             }
 
             if ("true".equals(removeImage)) {
                 existingUser.setProfileImage(null);
-                System.out.println("Removed profileImage from MongoDB");
-            } else if (profileImage != null && !profileImage.isEmpty()) {
-                byte[] imageBytes = profileImage.getBytes();
-                existingUser.setProfileImage(imageBytes);
-                System.out.println("Updated profileImage in MongoDB");
+                logger.debug("Removed profileImage from MongoDB");
+            }
+
+            if (profileImage != null) {
+                existingUser.setProfileImage(profileImage.getBytes());
+                logger.debug("Updated profileImage in MongoDB");
             }
 
             movieService.updateUser(existingUser);
-            System.out.println("User saved to MongoDB");
+            logger.debug("User saved to MongoDB");
             return ResponseEntity.ok("Profile updated successfully");
         } catch (IOException e) {
             return ResponseEntity.badRequest().body("Error processing image: " + e.getMessage());
@@ -138,7 +140,7 @@ public class MovieController {
     }
 
     @GetMapping("/popular")
-    public ResponseEntity<List<Map<String,Object>>> getPopularMovies() {
+    public ResponseEntity<List<Map<String, Object>>> getPopularMovies() {
         try {
             List<Map<String, Object>> movies = movieService.fetchPopularMovies();
             if (movies != null && !movies.isEmpty()) {
@@ -152,7 +154,7 @@ public class MovieController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Map<String,Object>>> getMovies(@RequestParam String title) {
+    public ResponseEntity<List<Map<String, Object>>> getMovies(@RequestParam String title) {
         try {
             List<Map<String, Object>> movies = movieService.fetchMoviesFromTmdb(title);
             if (movies != null && !movies.isEmpty()) {
@@ -166,7 +168,7 @@ public class MovieController {
     }
 
     @GetMapping("/user/{email}/favorites")
-    public ResponseEntity<List<Map<String,Object>>> getUserFavorites(@PathVariable String email) {
+    public ResponseEntity<List<Map<String, Object>>> getUserFavorites(@PathVariable String email) {
         Optional<User> userOptional = movieService.findByEmail(email);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
@@ -179,7 +181,7 @@ public class MovieController {
     @PostMapping("/user/{email}/favorites")
     public ResponseEntity<String> addMovieToFavorites(@PathVariable String email, @RequestBody Map<String, Object> movie) {
         Optional<User> userOptional = movieService.findByEmail(email);
-        if (!userOptional.isPresent()) {
+        if (userOptional.isEmpty()) {
             return ResponseEntity.status(404).body("User not found with email: " + email);
         }
 
@@ -202,7 +204,7 @@ public class MovieController {
             @PathVariable String email,
             @PathVariable String movieId) {
         Optional<User> userOptional = movieService.findByEmail(email);
-        if (!userOptional.isPresent()) {
+        if (userOptional.isEmpty()) {
             return ResponseEntity.status(404).body("User not found with email: " + email);
         }
 
