@@ -141,7 +141,7 @@ const MovieService = ({ userEmail, onNavigate }) => {
 
   const fetchMovieCategories = async (retryCount = 0) => {
     try {
-      const token = getAuthToken();
+      const token =await getAuthToken();
       if (!token) {
         setError('Please sign in to view movies.');
         onNavigate('signin');
@@ -151,50 +151,74 @@ const MovieService = ({ userEmail, onNavigate }) => {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
       };
-
-      const fetchWithRetry = async (url, options, retries) => {
-        try {
-          const response = await fetch(url, options);
-          if (!response.ok) {
-            if (response.status === 429 && retries > 0) {
-              await new Promise(resolve => setTimeout(resolve, 1000));
-              return fetchWithRetry(url, options, retries - 1);
-            }
-            throw new Error(`HTTP ${response.status}`);
-          }
-          return response.json();
-        } catch (error) {
-          throw new Error(`Failed to fetch ${url}: ${error.message}`);
-        }
-      };
-
-      const popularData = await fetchWithRetry(
+          const [result1,result2,result3,result4] = await Promise.all([ fetch(
         'http://localhost:8081/api/movies/popular',
-        { headers },
-        2
-      );
-      const horrorData = await fetchWithRetry(
+        { headers }),
+            fetch(
         'http://localhost:8081/api/movies/content/genre?genreId=27&type=movie',
-        { headers },
-        2
-      );
-      const comedyData = await fetchWithRetry(
+        { headers }),
+         fetch(
         'http://localhost:8081/api/movies/content/genre?genreId=35&type=movie',
-        { headers },
-        2
-      );
-      const actionData = await fetchWithRetry(
+        { headers }),
+          fetch(
         'http://localhost:8081/api/movies/content/genre?genreId=28&type=movie',
-        { headers },
-        2
-      );
+        { headers })
+      ])
 
-      setMovies({
-        popular: filterMoviesByVoteCount(popularData),
-        horror: filterMoviesByVoteCount(horrorData),
-        comedy: filterMoviesByVoteCount(comedyData),
-        action: filterMoviesByVoteCount(actionData)
-      });
+      const [res1,res2,res3,res4]
+ = await Promise.all([result1.json(),result2.json(),result3.json(),result4.json()])
+
+    setMovies({
+        popular: res1,
+        horror: res2,
+        comedy: res3,
+        action: res4
+      });     
+
+      // const fetchWithRetry = async (url, options, retries) => {
+      //   try {
+      //     const response = await fetch(url, options);
+      //     if (!response.ok) {
+      //       if (response.status === 429 && retries > 0) {
+      //         await new Promise(resolve => setTimeout(resolve, 1000));
+      //         return await fetchWithRetry(url, options, retries - 1);
+      //       }
+      //       throw new Error(`HTTP ${response.status}`);
+      //     }
+      //     const result =await response.json()
+      //     return result;
+      //   } catch (error) {
+      //     throw new Error(`Failed to fetch ${url}: ${error.message}`);
+      //   }
+      // };
+
+      // const popularData = await fetchWithRetry(
+      //   'http://localhost:8081/api/movies/popular',
+      //   { headers },
+      //   2
+      // );
+      // const horrorData = await fetchWithRetry(
+      //   'http://localhost:8081/api/movies/content/genre?genreId=27&type=movie',
+      //   { headers },
+      //   2
+      // );
+      // const comedyData = await fetchWithRetry(
+      //   'http://localhost:8081/api/movies/content/genre?genreId=35&type=movie',
+      //   { headers },
+      //   2
+      // );
+      // const actionData = await fetchWithRetry(
+      //   'http://localhost:8081/api/movies/content/genre?genreId=28&type=movie',
+      //   { headers },
+      //   2
+      // );
+
+      // setMovies({
+      //   popular: popularData,
+      //   horror: horrorData,
+      //   comedy: comedyData,
+      //   action: actionData
+      // });
       setError(null);
     } catch (error) {
       console.error('Error fetching movies:', error.message);

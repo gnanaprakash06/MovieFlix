@@ -48,12 +48,12 @@ const MovieDetails = ({ movie, onBack, isFavorite, onToggleFavorite }) => {
               <p className="overview-text">{movie.overview || 'No overview available'}</p>
             </div>
             <div className="info-item">
-              <button 
+              {/* <button 
                 className={`favorite-button ${isFavorite ? 'favorite' : ''}`}
                 onClick={onToggleFavorite}
-              >
-                {isFavorite ? 'Remove from Favorites ❤️' : 'Add to Favorites ❤️'}
-              </button>
+              > */}
+                {/* {isFavorite ? 'Remove from Favorites ❤️' : 'Add to Favorites ❤️'} */}
+              {/* </button> */}
             </div>
           </div>
         </div>
