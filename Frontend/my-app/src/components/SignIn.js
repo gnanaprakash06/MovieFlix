@@ -63,8 +63,9 @@ const SignIn = ({ onNavigate }) => {
         email: formData.email,
         password: formData.password
       });
-      window.authToken = response.token;
-      window.userEmail = formData.email;
+
+      // window.authToken = response.token;
+      // window.userEmail = formData.email;
       onNavigate('movieservice');
     } catch (error) {
       setServerError(error.message === 'Password is incorrect' ? 'Wrong password' : error.message);

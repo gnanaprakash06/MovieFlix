@@ -5,6 +5,7 @@ import SignUp from './components/SignUp';
 import Footer from './components/Footer';
 import MovieService from './services/MovieService';
 import './App.css';
+import { getUserEmail } from './services/authService';
 
 function App() {
   const [currentView, setCurrentView] = useState('home');
@@ -24,7 +25,7 @@ function App() {
         return <SignUp onNavigate={onNavigate} />;
 
       case 'movieservice':
-        return <MovieService userEmail={window.userEmail} onNavigate={onNavigate} />;
+        return <MovieService userEmail={getUserEmail()} onNavigate={onNavigate} />;
       default:
         return <Home onNavigate={onNavigate} />;
     }

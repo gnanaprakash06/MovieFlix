@@ -11,6 +11,8 @@ public interface MovieService {
 
     void registerUser(User user) throws UserAlreadyExistsException; //Calls UserAuthService
 
+    void createProfile(User user);
+
     List<Map<String, Object>> fetchMoviesFromTmdb(String title);
 
 

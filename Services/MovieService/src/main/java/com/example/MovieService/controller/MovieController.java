@@ -54,6 +54,28 @@ public class MovieController {
         }
     }
 
+    // ADD THIS NEW ENDPOINT - Missing create profile endpoint
+    @PostMapping("/users/{email}/create-profile")
+    public ResponseEntity<?> createProfile(@PathVariable String email, @RequestBody Map<String, String> profileData) {
+        try {
+            Optional<User> existingUser = movieService.findByEmail(email);
+            if (existingUser.isPresent()) {
+                return ResponseEntity.ok(existingUser.get());
+            }
+
+            // Create new user profile
+            User newUser = new User();
+            newUser.setEmail(email);
+            newUser.setUsername(profileData.getOrDefault("username", email.split("@")[0]));
+            newUser.setFavorites(new ArrayList<>());
+
+            movieService.createProfile(newUser);
+            return ResponseEntity.ok("Profile created successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error creating profile: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/users/{email}/profile")
     public ResponseEntity<?> getProfileData(@PathVariable String email) {
         Optional<User> userOptional = movieService.findByEmail(email);
@@ -117,20 +139,30 @@ public class MovieController {
 
     @GetMapping("/popular")
     public ResponseEntity<List<Map<String,Object>>> getPopularMovies() {
-        List<Map<String, Object>> movies = movieService.fetchPopularMovies();
-        if (movies != null && !movies.isEmpty()) {
-            return ResponseEntity.ok(movies);
+        try {
+            List<Map<String, Object>> movies = movieService.fetchPopularMovies();
+            if (movies != null && !movies.isEmpty()) {
+                return ResponseEntity.ok(movies);
+            }
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            System.out.println("Error in getPopularMovies: " +e.getMessage());
+            return ResponseEntity.status(500).build();
         }
-        return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<Map<String,Object>>> getMovies(@RequestParam String title) {
-        List<Map<String, Object>> movies = movieService.fetchMoviesFromTmdb(title);
-        if (movies != null && !movies.isEmpty()) {
-            return ResponseEntity.ok(movies);
+        try {
+            List<Map<String, Object>> movies = movieService.fetchMoviesFromTmdb(title);
+            if (movies != null && !movies.isEmpty()) {
+                return ResponseEntity.ok(movies);
+            }
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            System.out.println("Error in searchMovies: "+e.getMessage());
+            return ResponseEntity.status(500).build();
         }
-        return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/user/{email}/favorites")
@@ -189,10 +221,15 @@ public class MovieController {
     public ResponseEntity<List<Map<String, Object>>> getContentByGenre(
             @RequestParam String genreId,
             @RequestParam String type) {
-        List<Map<String, Object>> content = movieService.fetchMoviesByGenre(genreId, type);
-        if (content != null && !content.isEmpty()) {
-            return ResponseEntity.ok(content);
+        try {
+            List<Map<String, Object>> content = movieService.fetchMoviesByGenre(genreId, type);
+            if (content != null && !content.isEmpty()) {
+                return ResponseEntity.ok(content);
+            }
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            System.out.println("Error in getContentByGenre: "+e.getMessage());
+            return ResponseEntity.status(500).build();
         }
-        return ResponseEntity.notFound().build();
     }
 }
