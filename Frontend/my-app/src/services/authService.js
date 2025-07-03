@@ -50,6 +50,10 @@ export const getUsername = () => {
   return localStorage.getItem('username');
 }
 
+export const updateUsername = (newUsername) => {
+  localStorage.setItem('username',newUsername);
+}
+
 export const storeUserDetails = (userDetails) => {
   localStorage.setItem('username', userDetails.username);
   //Store other details if needed

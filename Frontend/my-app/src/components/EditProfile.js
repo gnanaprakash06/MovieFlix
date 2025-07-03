@@ -1,10 +1,11 @@
 import React, { useState, useRef } from 'react';
+import { getUsername } from '../services/authService';
 import '../App.css';
 
 const EditProfile = ({ userEmail, userProfile, onClose }) => {
   const [formData, setFormData] = useState({
-    username: userProfile?.name || '',
-    email: userProfile?.email || userEmail || ''
+    username: getUsername() || userEmail?.split('@')[0] || '', //Use localStorage username as fallback
+    email: userEmail || ''
   });
   const [profileImage, setProfileImage] = useState(null);
   const [previewImage, setPreviewImage] = useState(
@@ -49,6 +50,10 @@ const EditProfile = ({ userEmail, userProfile, onClose }) => {
       });
 
       if (response.ok) {
+
+        //Update username in localStorage
+        localStorage.setItem('username',formData.username);
+        
         setShowSuccess(true);
         setTimeout(() => {
           setShowSuccess(false);

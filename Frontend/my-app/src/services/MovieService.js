@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { logout, getAuthToken } from '../services/authService';
+import { logout, getAuthToken, getUsername } from '../services/authService';
 import MovieDetails from './MovieDetails';
 import EditProfile from '../components/EditProfile';
 import './MovieService.css';
@@ -21,7 +21,8 @@ const MovieService = ({ userEmail, onNavigate }) => {
   const [currentView, setCurrentView] = useState('home');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-  const [profileRetryCount, setProfileRetryCount] = useState(0);
+  // const [profileRetryCount, setProfileRetryCount] = useState(0);
+  const [username, setUsername] = useState('');
 
   useEffect(() => {
     if (!userEmail) {
@@ -29,16 +30,21 @@ const MovieService = ({ userEmail, onNavigate }) => {
       onNavigate('signin');
       return;
     }
+
+    //Get username from localStorage
+    const storedUsername = getUsername();
+    setUsername(storedUsername || userEmail.split('@')[0]);
+
     fetchUserProfile();
     fetchMovieCategories();
     fetchFavorites();
   }, [userEmail]);
 
   const fetchUserProfile = async () => {
-    if (profileRetryCount >= 3) {
-      setError('Failed to fetch user profile after multiple attempts.');
-      return;
-    }
+    // if (profileRetryCount >= 3) {
+    //   setError('Failed to fetch user profile after multiple attempts.');
+    //   return;
+    // }
     try {
       const token = getAuthToken();
       if (!token) {
@@ -53,17 +59,19 @@ const MovieService = ({ userEmail, onNavigate }) => {
         }
       });
       if (!response.ok) {
-        if (response.status === 404 && profileRetryCount < 3) {
+        // if (response.status === 404 && profileRetryCount < 3) {
+        if (response.status === 404){
           console.warn(`User profile not found for ${userEmail}, attempting to create...`);
-          setProfileRetryCount(prev => prev + 1);
+          // setProfileRetryCount(prev => prev + 1);
           await createUserProfile();
-          return fetchUserProfile(); // Retry after creating profile
+          // return fetchUserProfile(); // Retry after creating profile
+          return;
         }
         throw new Error(`Failed to fetch profile: ${response.status}`);
       }
       const data = await response.json();
       setUserProfile(data);
-      setProfileRetryCount(0);
+      // setProfileRetryCount(0);
       setError(null);
     } catch (error) {
       console.error('Error fetching user profile:', error.message);
@@ -84,7 +92,8 @@ const MovieService = ({ userEmail, onNavigate }) => {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ email: userEmail, username: userEmail.split('@')[0] })
+        // body: JSON.stringify({ email: userEmail, username: userEmail.split('@')[0] })
+        body: JSON.stringify({ email: userEmail, username: username })
       });
       if (!response.ok) {
         throw new Error('Failed to create user profile');
@@ -283,6 +292,14 @@ const MovieService = ({ userEmail, onNavigate }) => {
     setShowMovieDetails(true);
   };
 
+    // Function to update username after profile edit
+  const handleProfileUpdate = () => {
+    const storedUsername = getUsername();
+    setUsername(storedUsername || userEmail.split('@')[0]);
+    setShowEditProfile(false);
+    fetchUserProfile();
+  };
+
   const renderMovieCategory = (title, movieList) => (
     <div className="movie-category">
       <h2 className="category-title">{title}</h2>
@@ -416,7 +433,8 @@ const MovieService = ({ userEmail, onNavigate }) => {
             value={searchQuery}
             onChange={handleSearch}
           />
-          <span className="username">{userProfile?.name || 'User'}</span>
+          {/* <span className="username">{userProfile?.name || getUsername() || 'User'}</span> */}
+          <span className="username">{username}</span>
           {userProfile?.profileImage ? (
             <img
               src={`data:image/jpeg;base64,${userProfile.profileImage}`}
