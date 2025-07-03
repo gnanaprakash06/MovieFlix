@@ -53,7 +53,8 @@ const SignUp = ({ onNavigate }) => {
     }
 
     try {
-      const response = await signUpUser({
+      // Register in Auth Service (MySQL)
+      await signUpUser({
         username: formData.username,
         email: formData.email,
         password: formData.password,
@@ -125,7 +126,7 @@ const SignUp = ({ onNavigate }) => {
         <button
           type="submit"
           className="auth-button"
-          disabled={Object.keys(errors).length < 0}
+          disabled={Object.keys(errors).length > 0}
         >
           Sign Up
         </button>
