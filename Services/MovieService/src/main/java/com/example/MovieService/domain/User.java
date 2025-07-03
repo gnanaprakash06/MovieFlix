@@ -4,6 +4,7 @@ import jakarta.persistence.Lob;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ public class User {
     private String id;
     private String username;
     @Indexed(unique = true)
+    @Field("email")
     private String email;
     private String password;
 
