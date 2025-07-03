@@ -37,6 +37,7 @@ public class MovieServiceImpl implements MovieService {
         return movieRepository.findByEmail(email);
     }
 
+
     @Override
     public void registerUser(User user) throws UserAlreadyExistsException {
         if (movieRepository.findByEmail(user.getEmail()).isPresent()) {
