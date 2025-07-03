@@ -25,6 +25,36 @@ export const signUpUser = async (userData) => {
   }
 };
 
+export const fetchUserDetails = async (email) => {
+  try{
+    const response = await fetch(`${API_BASE_URL}/user/${email}`,{
+      method: 'GET',
+      headers: {
+        'Content-Type':'application/json',
+      },
+    });
+
+    if(!response.ok){
+      throw new Error('Failed to fetch user details');
+    }
+
+    const data = await response.json();
+    return data;
+  }catch(error){
+    console.error('Error fetching user details: ',error);
+    throw error;
+  }
+};
+
+export const getUsername = () => {
+  return localStorage.getItem('username');
+}
+
+export const storeUserDetails = (userDetails) => {
+  localStorage.setItem('username', userDetails.username);
+  //Store other details if needed
+}
+
 export const signInUser = async (credentials) => {
   try {
     const response = await fetch(`${API_BASE_URL}/login`, {
@@ -42,9 +72,19 @@ export const signInUser = async (credentials) => {
 
       const data = await response.json();
 
-      //Store token consistenly
+      //Store token and email
       localStorage.setItem('authToken', data.token);
       localStorage.setItem('userEmail', credentials.email);
+
+      //Fetch and store username
+      try{
+        const userDetails = await fetchUserDetails(credentials.email);
+        storeUserDetails(userDetails);
+      }catch(error){
+        console.error('Error fetching username:',error);
+        //Store email prefix as fallback
+        localStorage.setItem('username',credentials.email.split('@')[0]);
+      }
 
     return data;
   } catch (error) {
@@ -144,7 +184,9 @@ export const getUserEmail = () => {
 //   delete window.userEmail;
 // };
 
+//Logout Function
 export const logout = () => {
   localStorage.removeItem('authToken');
   localStorage.removeItem('userEmail');
+  localStorage.removeItem('username');
 }

@@ -7,7 +7,9 @@ import com.example.AuthService.services.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin("http://localhost:3000")
@@ -37,6 +39,24 @@ public class AuthController {
         String password = request.get("password");
 
         return authService.login(email, password);
+    }
+
+    @GetMapping("/user/{email}")
+    public ResponseEntity<?> getUserByEmail(@PathVariable String email) {
+        try {
+            // Assuming you have a user service/repository in auth service
+            Optional<User> user = authService.findByEmail(email);
+            if (user.isPresent()) {
+                Map<String, Object> userData = new HashMap<>();
+                userData.put("email", user.get().getEmail());
+                userData.put("username", user.get().getUsername());
+                // Don't include password for security
+                return ResponseEntity.ok(userData);
+            }
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error fetching user: " + e.getMessage());
+        }
     }
 
     @PostMapping("/forgot-password")

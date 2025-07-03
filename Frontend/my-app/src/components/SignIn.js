@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { validateEmail, validatePassword } from '../utils/validation';
-import { signInUser } from '../services/authService';
+import { signInUser,fetchUserDetails,storeUserDetails } from '../services/authService';
 import '../App.css';
 
 
@@ -66,11 +66,43 @@ const SignIn = ({ onNavigate }) => {
 
       // window.authToken = response.token;
       // window.userEmail = formData.email;
+
+      //Fetch username from auth service after successfull login
+      const userDetails = await fetchUserDetails(formData.email);
+
+      //Store username in localStorage
+      // localStorage.setItem('username',username);
+
+      //Store user details in localStorage using the service function
+      storeUserDetails(userDetails);
+
       onNavigate('movieservice');
     } catch (error) {
       setServerError(error.message === 'Password is incorrect' ? 'Wrong password' : error.message);
     }
   };
+
+  // //Fetch Username function
+  // const fetchUsername = async (email) => {
+  //   try{
+  //     const response = await fetch('http://localhost:8080/api/auth/user/${email}',{
+  //       method: 'GET',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //     });
+
+  //     if(response.ok){
+  //       const userData = await response.json();
+  //       return userData.username;
+  //     }
+  //   }catch(error){
+  //     console.error('Error fetching username:',error);
+  //   }
+
+  //   //Fallback to email prefix if fetch fails
+  //   return email.split('@')[0];
+  // };
 
   const handleForgotPassword = async (e) => {
     e.preventDefault();

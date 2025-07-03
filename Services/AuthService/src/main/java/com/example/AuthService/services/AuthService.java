@@ -29,6 +29,10 @@ public class AuthService {
         this.otpService = otpService;
     }
 
+    public Optional<User> findByEmail(String email){
+        return userRepository.findByEmail(email);
+    }
+
     public ResponseEntity<Response> signup(User user, String confirmPassword) throws UserAlreadyExistsException, PasswordMismatchException {
         if (userRepository.existsByUsername(user.getUsername())) {
             throw new UserAlreadyExistsException("Username " + user.getUsername() + " is already taken");

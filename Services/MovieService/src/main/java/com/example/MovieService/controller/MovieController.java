@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -64,10 +65,17 @@ public class MovieController {
                 return ResponseEntity.ok(existingUser.get());
             }
 
+            // Fetch username from auth service
+            String username = fetchUsernameFromAuthService(email);
+            if (username == null) {
+                username = email.split("@")[0]; // Fallback to email prefix
+            }
+
             // Create new user profile
             User newUser = new User();
             newUser.setEmail(email);
-            newUser.setUsername(profileData.getOrDefault("username", email.split("@")[0]));
+            newUser.setUsername(username);
+//            newUser.setUsername(profileData.getOrDefault("username", email.split("@")[0]));
             newUser.setFavorites(new ArrayList<>());
 
             movieService.createProfile(newUser);
@@ -75,6 +83,23 @@ public class MovieController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error creating profile: " + e.getMessage());
         }
+    }
+
+    private String fetchUsernameFromAuthService(String email) {
+        try {
+            // Make HTTP request to auth service to get user details
+            RestTemplate restTemplate = new RestTemplate();
+            String authServiceUrl = "http://localhost:8080/api/auth/user/" + email;
+
+            ResponseEntity<Map> response = restTemplate.getForEntity(authServiceUrl, Map.class);
+            if (response.getStatusCode() == HttpStatus.OK) {
+                Map<String, Object> userData = response.getBody();
+                return (String) userData.get("username");
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching username from auth service: " + e.getMessage());
+        }
+        return null;
     }
 
     @GetMapping("/users/{email}/profile")
