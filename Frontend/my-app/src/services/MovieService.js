@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { logout, getAuthToken, getUsername } from '../services/authService';
-import MovieDetails from './MovieDetails';
-import EditProfile from '../components/EditProfile';
-import './MovieService.css';
+import React, { useState, useEffect } from "react";
+import { logout, getAuthToken, getUsername } from "../services/authService";
+import MovieDetails from "./MovieDetails";
+import EditProfile from "../components/EditProfile";
+import "./MovieService.css";
 
 const MovieService = ({ userEmail, onNavigate }) => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -18,26 +18,26 @@ const MovieService = ({ userEmail, onNavigate }) => {
   });
   const [favorites, setFavorites] = useState([]);
   const [error, setError] = useState(null);
-  const [currentView, setCurrentView] = useState('home');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [currentView, setCurrentView] = useState("home");
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   // const [profileRetryCount, setProfileRetryCount] = useState(0);
-  const [username, setUsername] = useState('');
-    // Loading states for shimmer effect
+  const [username, setUsername] = useState("");
+  // Loading states for shimmer effect
   const [isLoadingMovies, setIsLoadingMovies] = useState(true);
   const [isLoadingFavorites, setIsLoadingFavorites] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     if (!userEmail) {
-      setError('No user email provided. Please sign in.');
-      onNavigate('signin');
+      setError("No user email provided. Please sign in.");
+      onNavigate("signin");
       return;
     }
 
     //Get username from localStorage
     const storedUsername = getUsername();
-    setUsername(storedUsername || userEmail.split('@')[0]);
+    setUsername(storedUsername || userEmail.split("@")[0]);
 
     fetchUserProfile();
     fetchMovieCategories();
@@ -45,27 +45,28 @@ const MovieService = ({ userEmail, onNavigate }) => {
   }, [userEmail]);
 
   const fetchUserProfile = async () => {
-    // if (profileRetryCount >= 3) {
-    //   setError('Failed to fetch user profile after multiple attempts.');
-    //   return;
-    // }
     try {
       const token = getAuthToken();
       if (!token) {
-        setError('Please sign in to view your profile.');
-        onNavigate('signin');
+        setError("Please sign in to view your profile.");
+        onNavigate("signin");
         return;
       }
-      const response = await fetch(`http://localhost:8081/api/movies/users/${userEmail}/profile`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        `http://localhost:8081/api/movies/users/${userEmail}/profile`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
       if (!response.ok) {
         // if (response.status === 404 && profileRetryCount < 3) {
-        if (response.status === 404){
-          console.warn(`User profile not found for ${userEmail}, attempting to create...`);
+        if (response.status === 404) {
+          console.warn(
+            `User profile not found for ${userEmail}, attempting to create...`
+          );
           // setProfileRetryCount(prev => prev + 1);
           await createUserProfile();
           // return fetchUserProfile(); // Retry after creating profile
@@ -78,160 +79,132 @@ const MovieService = ({ userEmail, onNavigate }) => {
       // setProfileRetryCount(0);
       setError(null);
     } catch (error) {
-      console.error('Error fetching user profile:', error.message);
-      setError(error.message || 'Failed to load user profile');
+      console.error("Error fetching user profile:", error.message);
+      setError(error.message || "Failed to load user profile");
     }
   };
 
   const createUserProfile = async () => {
     if (!userEmail) {
-      setError('Cannot create profile: No user email provided.');
+      setError("Cannot create profile: No user email provided.");
       return;
     }
     try {
       const token = getAuthToken();
-      const response = await fetch(`http://localhost:8081/api/movies/users/${userEmail}/create-profile`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        // body: JSON.stringify({ email: userEmail, username: userEmail.split('@')[0] })
-        body: JSON.stringify({ email: userEmail, username: username })
-      });
+      const response = await fetch(
+        `http://localhost:8081/api/movies/users/${userEmail}/create-profile`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          // body: JSON.stringify({ email: userEmail, username: userEmail.split('@')[0] })
+          body: JSON.stringify({ email: userEmail, username: username }),
+        }
+      );
       if (!response.ok) {
-        throw new Error('Failed to create user profile');
+        throw new Error("Failed to create user profile");
       }
     } catch (error) {
-      console.error('Error creating user profile:', error.message);
-      setError('Failed to create user profile');
+      console.error("Error creating user profile:", error.message);
+      setError("Failed to create user profile");
     }
   };
 
   const fetchFavorites = async () => {
     if (!userEmail) {
-      setError('Cannot fetch favorites: No user email provided.');
+      setError("Cannot fetch favorites: No user email provided.");
       return;
     }
     setIsLoadingFavorites(true);
     try {
       const token = getAuthToken();
-      const response = await fetch(`http://localhost:8081/api/movies/user/${userEmail}/favorites`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        `http://localhost:8081/api/movies/user/${userEmail}/favorites`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
       if (!response.ok) {
         if (response.status === 404) {
-          console.warn(`Favorites not found for ${userEmail}, initializing empty favorites...`);
+          console.warn(
+            `Favorites not found for ${userEmail}, initializing empty favorites...`
+          );
           setFavorites([]);
           return;
         }
-        throw new Error('Failed to fetch favorites');
+        throw new Error("Failed to fetch favorites");
       }
       const data = await response.json();
       setFavorites(data);
       setError(null);
     } catch (error) {
-      console.error('Error fetching favorites:', error.message);
-      setError(error.message || 'Failed to load favorites');
-          } finally {
+      console.error("Error fetching favorites:", error.message);
+      setError(error.message || "Failed to load favorites");
+    } finally {
       setIsLoadingFavorites(false);
     }
   };
 
   const filterMoviesByVoteCount = (movies, minVoteCount = 10) => {
     if (!Array.isArray(movies)) return [];
-    return movies.filter(movie => movie.vote_count >= minVoteCount);
+    return movies.filter((movie) => movie.vote_count >= minVoteCount);
   };
 
   const fetchMovieCategories = async (retryCount = 0) => {
     setIsLoadingMovies(true);
     try {
-      const token =await getAuthToken();
+      const token = await getAuthToken();
       if (!token) {
-        setError('Please sign in to view movies.');
-        onNavigate('signin');
+        setError("Please sign in to view movies.");
+        onNavigate("signin");
         return;
       }
       const headers = {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       };
-          const [result1,result2,result3,result4] = await Promise.all([ fetch(
-        'http://localhost:8081/api/movies/popular',
-        { headers }),
-            fetch(
-        'http://localhost:8081/api/movies/content/genre?genreId=27&type=movie',
-        { headers }),
-         fetch(
-        'http://localhost:8081/api/movies/content/genre?genreId=35&type=movie',
-        { headers }),
-          fetch(
-        'http://localhost:8081/api/movies/content/genre?genreId=28&type=movie',
-        { headers })
+      const [result1, result2, result3, result4] = await Promise.all([
+        fetch("http://localhost:8081/api/movies/popular", { headers }),
+        fetch(
+          "http://localhost:8081/api/movies/content/genre?genreId=27&type=movie",
+          { headers }
+        ),
+        fetch(
+          "http://localhost:8081/api/movies/content/genre?genreId=35&type=movie",
+          { headers }
+        ),
+        fetch(
+          "http://localhost:8081/api/movies/content/genre?genreId=28&type=movie",
+          { headers }
+        ),
       ]);
 
-      const [res1,res2,res3,res4]
- = await Promise.all([result1.json(),result2.json(),result3.json(),result4.json()]);
+      const [res1, res2, res3, res4] = await Promise.all([
+        result1.json(),
+        result2.json(),
+        result3.json(),
+        result4.json(),
+      ]);
 
-    setMovies({
+      setMovies({
         popular: res1,
         horror: res2,
         comedy: res3,
-        action: res4
-      });     
+        action: res4,
+      });
 
-      // const fetchWithRetry = async (url, options, retries) => {
-      //   try {
-      //     const response = await fetch(url, options);
-      //     if (!response.ok) {
-      //       if (response.status === 429 && retries > 0) {
-      //         await new Promise(resolve => setTimeout(resolve, 1000));
-      //         return await fetchWithRetry(url, options, retries - 1);
-      //       }
-      //       throw new Error(`HTTP ${response.status}`);
-      //     }
-      //     const result =await response.json()
-      //     return result;
-      //   } catch (error) {
-      //     throw new Error(`Failed to fetch ${url}: ${error.message}`);
-      //   }
-      // };
-
-      // const popularData = await fetchWithRetry(
-      //   'http://localhost:8081/api/movies/popular',
-      //   { headers },
-      //   2
-      // );
-      // const horrorData = await fetchWithRetry(
-      //   'http://localhost:8081/api/movies/content/genre?genreId=27&type=movie',
-      //   { headers },
-      //   2
-      // );
-      // const comedyData = await fetchWithRetry(
-      //   'http://localhost:8081/api/movies/content/genre?genreId=35&type=movie',
-      //   { headers },
-      //   2
-      // );
-      // const actionData = await fetchWithRetry(
-      //   'http://localhost:8081/api/movies/content/genre?genreId=28&type=movie',
-      //   { headers },
-      //   2
-      // );
-
-      // setMovies({
-      //   popular: popularData,
-      //   horror: horrorData,
-      //   comedy: comedyData,
-      //   action: actionData
-      // });
       setError(null);
     } catch (error) {
-      console.error('Error fetching movies:', error.message);
-      setError(error.message || 'Failed to load movies. Please try again later.');
-       } finally {
+      console.error("Error fetching movies:", error.message);
+      setError(
+        error.message || "Failed to load movies. Please try again later."
+      );
+    } finally {
       setIsLoadingMovies(false);
     }
   };
@@ -243,12 +216,17 @@ const MovieService = ({ userEmail, onNavigate }) => {
       setIsSearching(true);
       try {
         const token = getAuthToken();
-        const response = await fetch(`http://localhost:8081/api/movies/search?title=${encodeURIComponent(query)}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
+        const response = await fetch(
+          `http://localhost:8081/api/movies/search?title=${encodeURIComponent(
+            query
+          )}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
           }
-        });
+        );
         if (response.ok) {
           const data = await response.json();
           setSearchResults(filterMoviesByVoteCount(data));
@@ -256,9 +234,9 @@ const MovieService = ({ userEmail, onNavigate }) => {
           setSearchResults([]);
         }
       } catch (error) {
-        console.error('Error searching movies:', error.message);
+        console.error("Error searching movies:", error.message);
         setSearchResults([]);
-              } finally {
+      } finally {
         setIsSearching(false);
       }
     } else {
@@ -269,60 +247,66 @@ const MovieService = ({ userEmail, onNavigate }) => {
 
   const handleAddToFavorites = async (movie) => {
     if (!userEmail) {
-      setError('Cannot add to favorites: No user email provided.');
+      setError("Cannot add to favorites: No user email provided.");
       return;
     }
     try {
       const token = getAuthToken();
-      const response = await fetch(`http://localhost:8081/api/movies/user/${userEmail}/favorites`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(movie)
-      });
+      const response = await fetch(
+        `http://localhost:8081/api/movies/user/${userEmail}/favorites`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(movie),
+        }
+      );
       if (response.ok) {
         await fetchFavorites();
         setError(null);
       } else {
-        throw new Error('Failed to add movie to favorites');
+        throw new Error("Failed to add movie to favorites");
       }
     } catch (error) {
-      console.error('Error adding to favorites:', error.message);
-      setError('Failed to add movie to favorites');
+      console.error("Error adding to favorites:", error.message);
+      setError("Failed to add movie to favorites");
     }
   };
 
   const handleRemoveFromFavorites = async (movieId) => {
     if (!userEmail) {
-      setError('Cannot remove from favorites: No user email provided.');
+      setError("Cannot remove from favorites: No user email provided.");
       return;
     }
     try {
       const token = getAuthToken();
-      const response = await fetch(`http://localhost:8081/api/movies/user/${userEmail}/favorites/${movieId}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        `http://localhost:8081/api/movies/user/${userEmail}/favorites/${movieId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
       if (response.ok) {
         await fetchFavorites();
         setError(null);
       } else {
-        throw new Error('Failed to remove movie from favorites');
+        throw new Error("Failed to remove movie from favorites");
       }
     } catch (error) {
-      console.error('Error removing from favorites:', error.message);
-      setError('Failed to remove movie from favorites');
+      console.error("Error removing from favorites:", error.message);
+      setError("Failed to remove movie from favorites");
     }
   };
 
   const handleLogout = () => {
     logout();
-    onNavigate('home');
+    onNavigate("home");
   };
 
   const handleMovieClick = (movie) => {
@@ -330,10 +314,10 @@ const MovieService = ({ userEmail, onNavigate }) => {
     setShowMovieDetails(true);
   };
 
-    // Function to update username after profile edit
+  // Function to update username after profile edit
   const handleProfileUpdate = () => {
     const storedUsername = getUsername();
-    setUsername(storedUsername || userEmail.split('@')[0]);
+    setUsername(storedUsername || userEmail.split("@")[0]);
     setShowEditProfile(false);
     fetchUserProfile();
   };
@@ -354,13 +338,13 @@ const MovieService = ({ userEmail, onNavigate }) => {
       <div className="movie-grid">
         {isLoading ? (
           // Show shimmer cards while loading
-          Array(8).fill(0).map((_, index) => (
-            <MovieCardShimmer key={index} />
-          ))
+          Array(8)
+            .fill(0)
+            .map((_, index) => <MovieCardShimmer key={index} />)
         ) : movieList.length > 0 ? (
           movieList.map((movie) => (
-            <div 
-              key={movie.id} 
+            <div
+              key={movie.id}
               className="movie-card"
               onClick={() => handleMovieClick(movie)}
             >
@@ -369,12 +353,12 @@ const MovieService = ({ userEmail, onNavigate }) => {
                   className="favorite-btn"
                   onClick={(e) => {
                     e.stopPropagation();
-                    favorites.some(fav => fav.id === movie.id)
+                    favorites.some((fav) => fav.id === movie.id)
                       ? handleRemoveFromFavorites(movie.id)
                       : handleAddToFavorites(movie);
                   }}
                 >
-                  {favorites.some(fav => fav.id === movie.id) ? '❤️' : '🤍'}
+                  {favorites.some((fav) => fav.id === movie.id) ? "❤️" : "🤍"}
                 </button>
               </div>
               <img
@@ -400,13 +384,13 @@ const MovieService = ({ userEmail, onNavigate }) => {
       <div className="movie-grid">
         {isLoadingFavorites ? (
           // Show shimmer cards while loading favorites
-          Array(6).fill(0).map((_, index) => (
-            <MovieCardShimmer key={index} />
-          ))
+          Array(6)
+            .fill(0)
+            .map((_, index) => <MovieCardShimmer key={index} />)
         ) : favorites.length > 0 ? (
           favorites.map((movie) => (
-            <div 
-              key={movie.id} 
+            <div
+              key={movie.id}
               className="movie-card"
               onClick={() => handleMovieClick(movie)}
             >
@@ -470,14 +454,18 @@ const MovieService = ({ userEmail, onNavigate }) => {
           <h1 className="netflix-logo">MovieFlix</h1>
           <nav className="header-nav">
             <button
-              className={currentView === 'home' ? 'nav-link active' : 'nav-link'}
-              onClick={() => setCurrentView('home')}
+              className={
+                currentView === "home" ? "nav-link active" : "nav-link"
+              }
+              onClick={() => setCurrentView("home")}
             >
               Home
             </button>
             <button
-              className={currentView === 'favorites' ? 'nav-link active' : 'nav-link'}
-              onClick={() => setCurrentView('favorites')}
+              className={
+                currentView === "favorites" ? "nav-link active" : "nav-link"
+              }
+              onClick={() => setCurrentView("favorites")}
             >
               Favorites
             </button>
@@ -501,7 +489,7 @@ const MovieService = ({ userEmail, onNavigate }) => {
               onClick={() => setShowProfileMenu(!showProfileMenu)}
             />
           ) : (
-            <div 
+            <div
               className="profile-icon"
               onClick={() => setShowProfileMenu(!showProfileMenu)}
             >
@@ -510,7 +498,10 @@ const MovieService = ({ userEmail, onNavigate }) => {
           )}
           {showProfileMenu && (
             <div className="profile-dropdown">
-              <div className="dropdown-item" onClick={() => setShowEditProfile(true)}>
+              <div
+                className="dropdown-item"
+                onClick={() => setShowEditProfile(true)}
+              >
                 Edit Profile
               </div>
               <div className="dropdown-item" onClick={handleLogout}>
@@ -523,14 +514,30 @@ const MovieService = ({ userEmail, onNavigate }) => {
 
       <main className="movie-content">
         {error && <div className="error-message">{error}</div>}
-        {currentView === 'home' && searchQuery.length > 2 ? (
-          renderMovieCategory('Search Results', searchResults, isSearching)
-        ) : currentView === 'home' ? (
+        {currentView === "home" && searchQuery.length > 2 ? (
+          renderMovieCategory("Search Results", searchResults, isSearching)
+        ) : currentView === "home" ? (
           <>
-            {renderMovieCategory('Popular Movies', movies.popular, isLoadingMovies)}
-            {renderMovieCategory('Horror Movies', movies.horror, isLoadingMovies)}
-            {renderMovieCategory('Comedy Movies', movies.comedy, isLoadingMovies)}
-            {renderMovieCategory('Action Movies', movies.action, isLoadingMovies)}
+            {renderMovieCategory(
+              "Popular Movies",
+              movies.popular,
+              isLoadingMovies
+            )}
+            {renderMovieCategory(
+              "Horror Movies",
+              movies.horror,
+              isLoadingMovies
+            )}
+            {renderMovieCategory(
+              "Comedy Movies",
+              movies.comedy,
+              isLoadingMovies
+            )}
+            {renderMovieCategory(
+              "Action Movies",
+              movies.action,
+              isLoadingMovies
+            )}
           </>
         ) : (
           renderFavorites()
