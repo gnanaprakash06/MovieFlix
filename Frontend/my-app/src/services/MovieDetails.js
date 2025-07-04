@@ -1,5 +1,5 @@
-import React from 'react';
-import './MovieService.css';
+import React from "react";
+import "./MovieService.css";
 
 const MovieDetails = ({ movie, onBack, isFavorite, onToggleFavorite }) => {
   return (
@@ -7,7 +7,7 @@ const MovieDetails = ({ movie, onBack, isFavorite, onToggleFavorite }) => {
       <button className="back-button" onClick={onBack}>
         ← Back to Movies
       </button>
-      
+
       <div className="movie-details-content">
         <div className="trailer-section">
           <h2>Official Trailer</h2>
@@ -32,7 +32,8 @@ const MovieDetails = ({ movie, onBack, isFavorite, onToggleFavorite }) => {
               <strong>Movie Name:</strong> {movie.title || movie.name}
             </div>
             <div className="info-item">
-              <strong>Release Date:</strong> {movie.release_date || movie.first_air_date || 'N/A'}
+              <strong>Release Date:</strong>{" "}
+              {movie.release_date || movie.first_air_date || "N/A"}
             </div>
             <div className="info-item">
               <strong>Rating:</strong> ⭐ {movie.vote_average}/10
@@ -45,15 +46,9 @@ const MovieDetails = ({ movie, onBack, isFavorite, onToggleFavorite }) => {
             </div>
             <div className="info-item">
               <strong>Overview:</strong>
-              <p className="overview-text">{movie.overview || 'No overview available'}</p>
-            </div>
-            <div className="info-item">
-              {/* <button 
-                className={`favorite-button ${isFavorite ? 'favorite' : ''}`}
-                onClick={onToggleFavorite}
-              > */}
-                {/* {isFavorite ? 'Remove from Favorites ❤️' : 'Add to Favorites ❤️'} */}
-              {/* </button> */}
+              <p className="overview-text">
+                {movie.overview || "No overview available"}
+              </p>
             </div>
           </div>
         </div>
