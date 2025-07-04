@@ -47,7 +47,6 @@ export const validatePassword = (password) => {
   if (!/(?=.*[!@#$%^&*])/.test(password)) {
     return 'Password must contain at least one special character (!@#$%^&*)';
   }
-  
   return null;
 };
 
@@ -70,12 +69,12 @@ export const validateUsername = (username) => {
     return 'Username must be less than 20 characters';
   }
   
-  if (!/^[a-zA-Z0-9_]+$/.test(trimmedUsername)) {
-    return 'Username can only contain letters, numbers, and underscores';
-  }
-  
   if (!/^[a-zA-Z]/.test(trimmedUsername)) {
     return 'Username must start with a letter';
+  }
+
+  if (!/^[a-zA-Z0-9_]+$/.test(trimmedUsername)) {
+    return 'Username can only contain letters, numbers, and underscores';
   }
   
   return null;

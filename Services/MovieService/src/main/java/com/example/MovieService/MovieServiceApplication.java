@@ -20,11 +20,10 @@ public class MovieServiceApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(MovieServiceApplication.class);
-        
     }
 
     @Bean
-    public FilterRegistrationBean jwtFilterBean (){
+    public FilterRegistrationBean jwtFilterBean() {
         FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
         filterRegistrationBean.setFilter(new JwtFilter());
         filterRegistrationBean.addUrlPatterns("/api/auth/*");
