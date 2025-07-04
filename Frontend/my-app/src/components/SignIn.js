@@ -1,41 +1,44 @@
-import React, { useState } from 'react';
-import { validateEmail, validatePassword } from '../utils/validation';
-import { signInUser,fetchUserDetails,storeUserDetails } from '../services/authService';
-import '../App.css';
-
+import React, { useState } from "react";
+import { validateEmail, validatePassword } from "../utils/validation";
+import {
+  signInUser,
+  fetchUserDetails,
+  storeUserDetails,
+} from "../services/authService";
+import "../App.css";
 
 const SignIn = ({ onNavigate }) => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
 
   const [errors, setErrors] = useState({});
-  const [serverError, setServerError] = useState('');
+  const [serverError, setServerError] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
-  const [forgotPasswordError, setForgotPasswordError] = useState('');
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [forgotPasswordError, setForgotPasswordError] = useState("");
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [resetFormData, setResetFormData] = useState({
-    otp: '',
-    newPassword: '',
-    confirmPassword: ''
+    otp: "",
+    newPassword: "",
+    confirmPassword: "",
   });
-  const[forgotsuccess, setForgotSuccess] = useState(false);
+  const [forgotsuccess, setForgotSuccess] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
-  const [resetError, setResetError] = useState('');
+  const [resetError, setResetError] = useState("");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    setErrors(prev => ({
+    setErrors((prev) => ({
       ...prev,
-      [name]: null
+      [name]: null,
     }));
-    setServerError('');
+    setServerError("");
   };
 
   const validateForm = () => {
@@ -61,49 +64,25 @@ const SignIn = ({ onNavigate }) => {
     try {
       const response = await signInUser({
         email: formData.email,
-        password: formData.password
+        password: formData.password,
       });
-
-      // window.authToken = response.token;
-      // window.userEmail = formData.email;
 
       //Fetch username from auth service after successfull login
       const userDetails = await fetchUserDetails(formData.email);
 
-      //Store username in localStorage
-      // localStorage.setItem('username',username);
-
       //Store user details in localStorage using the service function
       storeUserDetails(userDetails);
 
-      onNavigate('movieservice');
+      onNavigate("movieservice");
     } catch (error) {
-      setServerError(error.message === 'Password is incorrect' ? 'Wrong password' : error.message);
+      setServerError(
+        error.message === "Password is incorrect"
+          ? "Wrong password"
+          : error.message
+      );
     }
   };
-
-  // //Fetch Username function
-  // const fetchUsername = async (email) => {
-  //   try{
-  //     const response = await fetch('http://localhost:8080/api/auth/user/${email}',{
-  //       method: 'GET',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //     });
-
-  //     if(response.ok){
-  //       const userData = await response.json();
-  //       return userData.username;
-  //     }
-  //   }catch(error){
-  //     console.error('Error fetching username:',error);
-  //   }
-
-  //   //Fallback to email prefix if fetch fails
-  //   return email.split('@')[0];
-  // };
-
+  
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     const emailError = validateEmail(forgotPasswordEmail);
@@ -113,85 +92,91 @@ const SignIn = ({ onNavigate }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:8080/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: forgotPasswordEmail })
-      });
+      const response = await fetch(
+        "http://localhost:8080/api/auth/forgot-password",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: forgotPasswordEmail }),
+        }
+      );
       const data = await response.json();
 
       if (response.ok) {
         setForgotSuccess(true);
-        setTimeout(()=>{
+        setTimeout(() => {
           setForgotSuccess(false);
-        setShowForgotPassword(false);
-        setShowResetPassword(true);
-        setForgotPasswordError('');
-        },2000);
+          setShowForgotPassword(false);
+          setShowResetPassword(true);
+          setForgotPasswordError("");
+        }, 2000);
       } else {
-        setForgotPasswordError(data.error || 'Failed to send OTP');
+        setForgotPasswordError(data.error || "Failed to send OTP");
       }
     } catch (error) {
-      setForgotPasswordError('Error sending OTP');
+      setForgotPasswordError("Error sending OTP");
     }
   };
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
     const newErrors = {};
-    if (!resetFormData.otp) newErrors.otp = 'OTP is required';
+    if (!resetFormData.otp) newErrors.otp = "OTP is required";
     const passwordError = validatePassword(resetFormData.newPassword);
     if (passwordError) newErrors.newPassword = passwordError;
     if (resetFormData.newPassword !== resetFormData.confirmPassword) {
-      newErrors.confirmPassword = 'Password does not match';
+      newErrors.confirmPassword = "Password does not match";
     }
 
     if (Object.keys(newErrors).length > 0) {
-      setResetError('');
+      setResetError("");
       setErrors(newErrors);
       return;
     }
 
     try {
-      const response = await fetch('http://localhost:8080/api/auth/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: forgotPasswordEmail,
-          otp: resetFormData.otp,
-          newPassword: resetFormData.newPassword,
-          confirmPassword: resetFormData.confirmPassword
-        })
-      });
+      const response = await fetch(
+        "http://localhost:8080/api/auth/reset-password",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: forgotPasswordEmail,
+            otp: resetFormData.otp,
+            newPassword: resetFormData.newPassword,
+            confirmPassword: resetFormData.confirmPassword,
+          }),
+        }
+      );
       const data = await response.json();
       if (response.ok) {
         setResetSuccess(true);
         setTimeout(() => {
           setResetSuccess(false);
           setShowResetPassword(false);
-          setResetFormData({ otp: '', newPassword: '', confirmPassword: '' });
-          setForgotPasswordEmail('');
+          setResetFormData({ otp: "", newPassword: "", confirmPassword: "" });
+          setForgotPasswordEmail("");
           setShowForgotPassword(false);
         }, 2000);
       } else {
-        setResetError(data.error || 'Failed to reset password');
+        setResetError(data.error || "Failed to reset password");
       }
     } catch (error) {
-      setResetError('Error resetting password');
+      setResetError("Error resetting password");
     }
   };
 
   const handleResetInputChange = (e) => {
     const { name, value } = e.target;
-    setResetFormData(prev => ({
+    setResetFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    setErrors(prev => ({
+    setErrors((prev) => ({
       ...prev,
-      [name]: null
+      [name]: null,
     }));
-    setResetError('');
+    setResetError("");
   };
 
   if (showForgotPassword) {
@@ -206,18 +191,26 @@ const SignIn = ({ onNavigate }) => {
               value={forgotPasswordEmail}
               onChange={(e) => {
                 setForgotPasswordEmail(e.target.value);
-                setForgotPasswordError('');
+                setForgotPasswordError("");
               }}
-              className={`form-input ${forgotPasswordError ? 'form-input-error' : ''}`}
+              className={`form-input ${
+                forgotPasswordError ? "form-input-error" : ""
+              }`}
               placeholder=" "
             />
             <label className="form-label">Email</label>
-            {forgotPasswordError && <div className="error-message">{forgotPasswordError}</div>}
+            {forgotPasswordError && (
+              <div className="error-message">{forgotPasswordError}</div>
+            )}
           </div>
-          <button type="submit" className="auth-button">Send OTP</button>
-              
+          <button type="submit" className="auth-button">
+            Send OTP
+          </button>
+
           <div className="auth-link">
-            <a href="#" onClick={() => setShowForgotPassword(false)}>Back to Sign In</a>
+            <a href="#" onClick={() => setShowForgotPassword(false)}>
+              Back to Sign In
+            </a>
           </div>
           {forgotsuccess && (
             <div className="success-dialog">
@@ -253,7 +246,7 @@ const SignIn = ({ onNavigate }) => {
               name="otp"
               value={resetFormData.otp}
               onChange={handleResetInputChange}
-              className={`form-input ${errors.otp ? 'form-input-error' : ''}`}
+              className={`form-input ${errors.otp ? "form-input-error" : ""}`}
               placeholder=" "
             />
             <label className="form-label">OTP</label>
@@ -265,11 +258,15 @@ const SignIn = ({ onNavigate }) => {
               name="newPassword"
               value={resetFormData.newPassword}
               onChange={handleResetInputChange}
-              className={`form-input ${errors.newPassword ? 'form-input-error' : ''}`}
+              className={`form-input ${
+                errors.newPassword ? "form-input-error" : ""
+              }`}
               placeholder=" "
             />
             <label className="form-label">New Password</label>
-            {errors.newPassword && <div className="error-message">{errors.newPassword}</div>}
+            {errors.newPassword && (
+              <div className="error-message">{errors.newPassword}</div>
+            )}
           </div>
           <div className="form-group">
             <input
@@ -277,16 +274,24 @@ const SignIn = ({ onNavigate }) => {
               name="confirmPassword"
               value={resetFormData.confirmPassword}
               onChange={handleResetInputChange}
-              className={`form-input ${errors.confirmPassword ? 'form-input-error' : ''}`}
+              className={`form-input ${
+                errors.confirmPassword ? "form-input-error" : ""
+              }`}
               placeholder=" "
             />
             <label className="form-label">Confirm Password</label>
-            {errors.confirmPassword && <div className="error-message">{errors.confirmPassword}</div>}
+            {errors.confirmPassword && (
+              <div className="error-message">{errors.confirmPassword}</div>
+            )}
           </div>
           {resetError && <div className="error-message">{resetError}</div>}
-          <button type="submit" className="auth-button">Reset Password</button>
+          <button type="submit" className="auth-button">
+            Reset Password
+          </button>
           <div className="auth-link">
-            <a href="#" onClick={() => setShowResetPassword(false)}>Back to Forgot Password</a>
+            <a href="#" onClick={() => setShowResetPassword(false)}>
+              Back to Forgot Password
+            </a>
           </div>
           {resetSuccess && (
             <div className="success-dialog">
@@ -310,7 +315,7 @@ const SignIn = ({ onNavigate }) => {
             name="email"
             value={formData.email}
             onChange={handleInputChange}
-            className={`form-input ${errors.email ? 'form-input-error' : ''}`}
+            className={`form-input ${errors.email ? "form-input-error" : ""}`}
             placeholder=" "
           />
           <label className="form-label">Email</label>
@@ -322,19 +327,30 @@ const SignIn = ({ onNavigate }) => {
             name="password"
             value={formData.password}
             onChange={handleInputChange}
-            className={`form-input ${errors.password ? 'form-input-error' : ''}`}
+            className={`form-input ${
+              errors.password ? "form-input-error" : ""
+            }`}
             placeholder=" "
           />
           <label className="form-label">Password</label>
-          {errors.password && <div className="error-message">{errors.password}</div>}
+          {errors.password && (
+            <div className="error-message">{errors.password}</div>
+          )}
         </div>
         {serverError && <div className="error-message">{serverError}</div>}
-        <button type="submit" className="auth-button">Sign In</button>
+        <button type="submit" className="auth-button">
+          Sign In
+        </button>
         <div className="auth-link">
-          <a href="#" onClick={() => setShowForgotPassword(true)}>Forgot Password?</a>
+          <a href="#" onClick={() => setShowForgotPassword(true)}>
+            Forgot Password?
+          </a>
         </div>
         <div className="auth-link">
-          New to MovieFlix? <a href="#" onClick={() => onNavigate('signup')}>Sign up now</a>
+          New to MovieFlix?{" "}
+          <a href="#" onClick={() => onNavigate("signup")}>
+            Sign up now
+          </a>
         </div>
       </form>
     </div>
