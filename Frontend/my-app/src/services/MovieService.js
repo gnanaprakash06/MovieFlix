@@ -23,6 +23,10 @@ const MovieService = ({ userEmail, onNavigate }) => {
   const [searchResults, setSearchResults] = useState([]);
   // const [profileRetryCount, setProfileRetryCount] = useState(0);
   const [username, setUsername] = useState('');
+    // Loading states for shimmer effect
+  const [isLoadingMovies, setIsLoadingMovies] = useState(true);
+  const [isLoadingFavorites, setIsLoadingFavorites] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     if (!userEmail) {
@@ -109,6 +113,7 @@ const MovieService = ({ userEmail, onNavigate }) => {
       setError('Cannot fetch favorites: No user email provided.');
       return;
     }
+    setIsLoadingFavorites(true);
     try {
       const token = getAuthToken();
       const response = await fetch(`http://localhost:8081/api/movies/user/${userEmail}/favorites`, {
@@ -131,6 +136,8 @@ const MovieService = ({ userEmail, onNavigate }) => {
     } catch (error) {
       console.error('Error fetching favorites:', error.message);
       setError(error.message || 'Failed to load favorites');
+          } finally {
+      setIsLoadingFavorites(false);
     }
   };
 
@@ -140,6 +147,7 @@ const MovieService = ({ userEmail, onNavigate }) => {
   };
 
   const fetchMovieCategories = async (retryCount = 0) => {
+    setIsLoadingMovies(true);
     try {
       const token =await getAuthToken();
       if (!token) {
@@ -163,10 +171,10 @@ const MovieService = ({ userEmail, onNavigate }) => {
           fetch(
         'http://localhost:8081/api/movies/content/genre?genreId=28&type=movie',
         { headers })
-      ])
+      ]);
 
       const [res1,res2,res3,res4]
- = await Promise.all([result1.json(),result2.json(),result3.json(),result4.json()])
+ = await Promise.all([result1.json(),result2.json(),result3.json(),result4.json()]);
 
     setMovies({
         popular: res1,
@@ -223,6 +231,8 @@ const MovieService = ({ userEmail, onNavigate }) => {
     } catch (error) {
       console.error('Error fetching movies:', error.message);
       setError(error.message || 'Failed to load movies. Please try again later.');
+       } finally {
+      setIsLoadingMovies(false);
     }
   };
 
@@ -230,6 +240,7 @@ const MovieService = ({ userEmail, onNavigate }) => {
     const query = e.target.value;
     setSearchQuery(query);
     if (query.length > 2) {
+      setIsSearching(true);
       try {
         const token = getAuthToken();
         const response = await fetch(`http://localhost:8081/api/movies/search?title=${encodeURIComponent(query)}`, {
@@ -247,9 +258,12 @@ const MovieService = ({ userEmail, onNavigate }) => {
       } catch (error) {
         console.error('Error searching movies:', error.message);
         setSearchResults([]);
+              } finally {
+        setIsSearching(false);
       }
     } else {
       setSearchResults([]);
+      setIsSearching(false);
     }
   };
 
@@ -324,11 +338,26 @@ const MovieService = ({ userEmail, onNavigate }) => {
     fetchUserProfile();
   };
 
-  const renderMovieCategory = (title, movieList) => (
+  // Shimmer component for movie cards
+  const MovieCardShimmer = () => (
+    <div className="movie-card shimmer-card">
+      <div className="shimmer-poster"></div>
+      <div className="shimmer-info">
+        <div className="shimmer-title"></div>
+      </div>
+    </div>
+  );
+
+  const renderMovieCategory = (title, movieList, isLoading = false) => (
     <div className="movie-category">
       <h2 className="category-title">{title}</h2>
       <div className="movie-grid">
-        {movieList.length > 0 ? (
+        {isLoading ? (
+          // Show shimmer cards while loading
+          Array(8).fill(0).map((_, index) => (
+            <MovieCardShimmer key={index} />
+          ))
+        ) : movieList.length > 0 ? (
           movieList.map((movie) => (
             <div 
               key={movie.id} 
@@ -369,7 +398,12 @@ const MovieService = ({ userEmail, onNavigate }) => {
     <div className="movie-category">
       <h2 className="category-title">Favorites</h2>
       <div className="movie-grid">
-        {favorites.length > 0 ? (
+        {isLoadingFavorites ? (
+          // Show shimmer cards while loading favorites
+          Array(6).fill(0).map((_, index) => (
+            <MovieCardShimmer key={index} />
+          ))
+        ) : favorites.length > 0 ? (
           favorites.map((movie) => (
             <div 
               key={movie.id} 
@@ -490,13 +524,13 @@ const MovieService = ({ userEmail, onNavigate }) => {
       <main className="movie-content">
         {error && <div className="error-message">{error}</div>}
         {currentView === 'home' && searchQuery.length > 2 ? (
-          renderMovieCategory('Search Results', searchResults)
+          renderMovieCategory('Search Results', searchResults, isSearching)
         ) : currentView === 'home' ? (
           <>
-            {renderMovieCategory('Popular Movies', movies.popular)}
-            {renderMovieCategory('Horror Movies', movies.horror)}
-            {renderMovieCategory('Comedy Movies', movies.comedy)}
-            {renderMovieCategory('Action Movies', movies.action)}
+            {renderMovieCategory('Popular Movies', movies.popular, isLoadingMovies)}
+            {renderMovieCategory('Horror Movies', movies.horror, isLoadingMovies)}
+            {renderMovieCategory('Comedy Movies', movies.comedy, isLoadingMovies)}
+            {renderMovieCategory('Action Movies', movies.action, isLoadingMovies)}
           </>
         ) : (
           renderFavorites()
