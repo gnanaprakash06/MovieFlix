@@ -21,12 +21,14 @@ const MovieService = ({ userEmail, onNavigate }) => {
   const [currentView, setCurrentView] = useState("home");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  // const [profileRetryCount, setProfileRetryCount] = useState(0);
+  const [showSearchInput, setShowSearchInput] = useState(false);
   const [username, setUsername] = useState("");
-  // Loading states for shimmer effect
   const [isLoadingMovies, setIsLoadingMovies] = useState(true);
   const [isLoadingFavorites, setIsLoadingFavorites] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
+  // Alert states
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
 
   useEffect(() => {
     if (!userEmail) {
@@ -62,21 +64,17 @@ const MovieService = ({ userEmail, onNavigate }) => {
         }
       );
       if (!response.ok) {
-        // if (response.status === 404 && profileRetryCount < 3) {
         if (response.status === 404) {
           console.warn(
             `User profile not found for ${userEmail}, attempting to create...`
           );
-          // setProfileRetryCount(prev => prev + 1);
           await createUserProfile();
-          // return fetchUserProfile(); // Retry after creating profile
           return;
         }
         throw new Error(`Failed to fetch profile: ${response.status}`);
       }
       const data = await response.json();
       setUserProfile(data);
-      // setProfileRetryCount(0);
       setError(null);
     } catch (error) {
       console.error("Error fetching user profile:", error.message);
@@ -99,7 +97,6 @@ const MovieService = ({ userEmail, onNavigate }) => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          // body: JSON.stringify({ email: userEmail, username: userEmail.split('@')[0] })
           body: JSON.stringify({ email: userEmail, username: username }),
         }
       );
@@ -245,6 +242,17 @@ const MovieService = ({ userEmail, onNavigate }) => {
     }
   };
 
+  const handleSearchIconClick = () => {
+    setShowSearchInput(true);
+  };
+
+  const handleSearchBlur = () => {
+    // Hide search input when it loses focus and is empty
+    if (searchQuery.trim() === "") {
+      setShowSearchInput(false);
+    }
+  };
+
   const handleAddToFavorites = async (movie) => {
     if (!userEmail) {
       setError("Cannot add to favorites: No user email provided.");
@@ -266,6 +274,13 @@ const MovieService = ({ userEmail, onNavigate }) => {
       if (response.ok) {
         await fetchFavorites();
         setError(null);
+        // Show success alert
+        setAlertMessage(`${movie.title || movie.name} added to favorites!`);
+        setShowAlert(true);
+        // Auto-hide alert after 3 seconds
+        setTimeout(() => {
+          setShowAlert(false);
+        }, 3000);
       } else {
         throw new Error("Failed to add movie to favorites");
       }
@@ -332,6 +347,41 @@ const MovieService = ({ userEmail, onNavigate }) => {
     </div>
   );
 
+  // Search Icon SVG Component
+  const SearchIcon = () => (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="search-icon"
+    >
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.35-4.35" />
+    </svg>
+  );
+
+  // Alert Component
+  const Alert = ({ message, isVisible, onClose }) => {
+    if (!isVisible) return null;
+    
+    return (
+      <div className="alert-container">
+        <div className="alert-box">
+          <div className="alert-content">
+            <span className="alert-icon">✓</span>
+            <span className="alert-message">{message}</span>
+          </div>
+          <button className="alert-close" onClick={onClose}>×</button>
+        </div>
+      </div>
+    );
+  };
+
   const renderMovieCategory = (title, movieList, isLoading = false) => (
     <div className="movie-category">
       <h2 className="category-title">{title}</h2>
@@ -378,9 +428,10 @@ const MovieService = ({ userEmail, onNavigate }) => {
     </div>
   );
 
+  // Updated renderFavorites function with centered title and heart icon
   const renderFavorites = () => (
     <div className="movie-category">
-      <h2 className="category-title">Favorites</h2>
+      <h2 className="category-title favorites-title"></h2>
       <div className="movie-grid">
         {isLoadingFavorites ? (
           // Show shimmer cards while loading favorites
@@ -416,7 +467,22 @@ const MovieService = ({ userEmail, onNavigate }) => {
             </div>
           ))
         ) : (
-          <p>No favorites added</p>
+          <div className="no-favorites-container">
+            <div className="no-favorites-content">
+              <svg 
+                className="heart-icon" 
+                width="32" 
+                height="32" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2"
+              >
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              <p className="no-favorites-text">No Favorites Added</p>
+            </div>
+          </div>
         )}
       </div>
     </div>
@@ -473,14 +539,27 @@ const MovieService = ({ userEmail, onNavigate }) => {
           </nav>
         </div>
         <div className="header-right">
-          <input
-            type="text"
-            className="search-input"
-            placeholder="Search movies..."
-            value={searchQuery}
-            onChange={handleSearch}
-          />
-          {/* <span className="username">{userProfile?.name || getUsername() || 'User'}</span> */}
+          <div className="search-container">
+            {!showSearchInput ? (
+              <button
+                className="search-icon-btn"
+                onClick={handleSearchIconClick}
+                aria-label="Search movies"
+              >
+                <SearchIcon />
+              </button>
+            ) : (
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Search movies..."
+                value={searchQuery}
+                onChange={handleSearch}
+                onBlur={handleSearchBlur}
+                autoFocus
+              />
+            )}
+          </div>
           <span className="username">{username}</span>
           {userProfile?.profileImage ? (
             <img
@@ -512,6 +591,13 @@ const MovieService = ({ userEmail, onNavigate }) => {
           )}
         </div>
       </header>
+
+      {/* Alert Component */}
+      <Alert 
+        message={alertMessage} 
+        isVisible={showAlert} 
+        onClose={() => setShowAlert(false)} 
+      />
 
       <main className="movie-content">
         {error && <div className="error-message">{error}</div>}

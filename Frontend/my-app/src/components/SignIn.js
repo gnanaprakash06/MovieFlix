@@ -41,16 +41,16 @@ const SignIn = ({ onNavigate }) => {
     setServerError("");
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    const emailError = validateEmail(formData.email);
-    const passwordError = validatePassword(formData.password);
+const validateForm = () => {
+  const newErrors = {};
+  const emailError = validateEmail(formData.email);
+  // Removed password validation
+  
+  if (emailError) newErrors.email = emailError;
+  // Removed: if (passwordError) newErrors.password = passwordError;
 
-    if (emailError) newErrors.email = emailError;
-    if (passwordError) newErrors.password = passwordError;
-
-    return newErrors;
-  };
+  return newErrors;
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -327,10 +327,8 @@ const SignIn = ({ onNavigate }) => {
             name="password"
             value={formData.password}
             onChange={handleInputChange}
-            className={`form-input ${
-              errors.password ? "form-input-error" : ""
-            }`}
-            placeholder=" "
+           className="form-input" // Removed conditional error styling
+          placeholder=" "
           />
           <label className="form-label">Password</label>
           {errors.password && (
