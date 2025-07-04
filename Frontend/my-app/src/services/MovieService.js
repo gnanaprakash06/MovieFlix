@@ -431,6 +431,7 @@ const MovieService = ({ userEmail, onNavigate }) => {
           setShowEditProfile(false);
           fetchUserProfile();
         }}
+        onProfileUpdate={handleProfileUpdate}
       />
     );
   }

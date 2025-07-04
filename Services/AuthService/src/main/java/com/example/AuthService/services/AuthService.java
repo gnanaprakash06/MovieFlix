@@ -126,4 +126,11 @@ public class AuthService {
             throw new AuthServiceException("Failed to reset password: " + e.getMessage(), e);
         }
     }
+    public boolean existsByUsernameAndNotEmail(String username, String email) {
+        return userRepository.existsByUsernameAndEmailNot(username, email);
+    }
+
+    public void updateUser(User user) {
+        userRepository.save(user);
+    }
 }

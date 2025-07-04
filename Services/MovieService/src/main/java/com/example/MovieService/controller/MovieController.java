@@ -9,9 +9,7 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -126,7 +124,6 @@ public class MovieController {
             return ResponseEntity.notFound().build();
         }
     }
-
     @PutMapping(value = "/users/{email}/profile", consumes = {"multipart/form-data"})
     public ResponseEntity<String> updateProfile(
             @PathVariable String email,
@@ -142,6 +139,8 @@ public class MovieController {
             User existingUser = userOpt.get();
             if (username != null && !username.isBlank()) {
                 existingUser.setUsername(username);
+                // Update username in Auth Service SQL database
+                updateUsernameInAuthService(email, username);
             }
 
             if ("true".equals(removeImage)) {
@@ -161,6 +160,35 @@ public class MovieController {
             return ResponseEntity.badRequest().body("Error processing image: " + e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Unexpected error: " + e.getMessage());
+        }
+    }
+
+    private void updateUsernameInAuthService(String email, String username) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            String authServiceUrl = "http://localhost:8080/api/auth/user/" + email + "/username";
+
+            Map<String, String> requestBody = new HashMap<>();
+            requestBody.put("username", username);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<Map<String, String>> entity = new HttpEntity<>(requestBody, headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    authServiceUrl,
+                    HttpMethod.PUT,
+                    entity,
+                    String.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                logger.debug("Username updated successfully in Auth Service");
+            }
+        } catch (Exception e) {
+            logger.error("Error updating username in Auth Service: " + e.getMessage());
+            // Don't throw exception to avoid breaking the profile update
         }
     }
 

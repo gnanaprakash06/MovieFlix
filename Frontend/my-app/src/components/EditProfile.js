@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { getUsername } from "../services/authService";
 import "../App.css";
 
-const EditProfile = ({ userEmail, userProfile, onClose }) => {
+const EditProfile = ({ userEmail, userProfile, onClose, onProfileUpdate }) => {
   const [formData, setFormData] = useState({
     username: getUsername() || userEmail?.split("@")[0] || "", //Use localStorage username as fallback
     email: userEmail || "",
@@ -37,40 +37,42 @@ const EditProfile = ({ userEmail, userProfile, onClose }) => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      const formDataToSend = new FormData();
-      formDataToSend.append("username", formData.username);
-      if (profileImage) {
-        formDataToSend.append("profileImage", profileImage);
-      }
-
-      const response = await fetch(
-        `http://localhost:8081/api/movies/users/${userEmail}/profile`,
-        {
-          method: "PUT",
-          body: formDataToSend,
-        }
-      );
-
-      if (response.ok) {
-        //Update username in localStorage
-        localStorage.setItem("username", formData.username);
-
-        setShowSuccess(true);
-        setTimeout(() => {
-          setShowSuccess(false);
-          onClose();
-        }, 2000);
-      } else {
-        alert("Failed to update profile");
-      }
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      alert("Error updating profile");
+  e.preventDefault();
+  
+  try {
+    const formDataToSend = new FormData();
+    formDataToSend.append('username', formData.username);
+    if (profileImage) {
+      formDataToSend.append('profileImage', profileImage);
     }
-  };
+
+    const response = await fetch(`http://localhost:8081/api/movies/users/${userEmail}/profile`, {
+      method: 'PUT',
+      body: formDataToSend
+    });
+
+    if (response.ok) {
+      // Update username in localStorage
+      localStorage.setItem('username', formData.username);
+      
+      // Call parent callback to update username in UI
+      if (onProfileUpdate) {
+        onProfileUpdate();
+      }
+      
+      setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+        onClose();
+      }, 2000);
+    } else {
+      alert('Failed to update profile');
+    }
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    alert('Error updating profile');
+  }
+};
 
   return (
     <div className="edit-profile-overlay">

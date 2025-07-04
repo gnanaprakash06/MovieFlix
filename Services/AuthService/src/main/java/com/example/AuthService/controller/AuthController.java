@@ -103,4 +103,33 @@ public class AuthController {
 
         return authService.resetPassword(email, otp, newPassword, confirmPassword);
     }
+    @PutMapping("/user/{email}/username")
+    public ResponseEntity<?> updateUsername(@PathVariable String email, @RequestBody Map<String, String> request) {
+        try {
+            String newUsername = request.get("username");
+            if (newUsername == null || newUsername.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Username cannot be empty");
+            }
+
+            Optional<User> userOpt = authService.findByEmail(email);
+            if (userOpt.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            User user = userOpt.get();
+
+            // Check if username is already taken by another user
+            if (authService.existsByUsernameAndNotEmail(newUsername, email)) {
+                return ResponseEntity.badRequest().body("Username is already taken");
+            }
+
+            user.setUsername(newUsername);
+            authService.updateUser(user);
+
+            return ResponseEntity.ok("Username updated successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error updating username: " + e.getMessage());
+        }
+    }
+
 }
