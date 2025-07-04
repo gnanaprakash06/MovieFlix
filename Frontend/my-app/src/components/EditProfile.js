@@ -1,24 +1,26 @@
-import React, { useState, useRef } from 'react';
-import { getUsername } from '../services/authService';
-import '../App.css';
+import React, { useState, useRef } from "react";
+import { getUsername } from "../services/authService";
+import "../App.css";
 
 const EditProfile = ({ userEmail, userProfile, onClose }) => {
   const [formData, setFormData] = useState({
-    username: getUsername() || userEmail?.split('@')[0] || '', //Use localStorage username as fallback
-    email: userEmail || ''
+    username: getUsername() || userEmail?.split("@")[0] || "", //Use localStorage username as fallback
+    email: userEmail || "",
   });
   const [profileImage, setProfileImage] = useState(null);
   const [previewImage, setPreviewImage] = useState(
-    userProfile?.profileImage ? `data:image/jpeg;base64,${userProfile.profileImage}` : null
+    userProfile?.profileImage
+      ? `data:image/jpeg;base64,${userProfile.profileImage}`
+      : null
   );
   const [showSuccess, setShowSuccess] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -36,35 +38,37 @@ const EditProfile = ({ userEmail, userProfile, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append('username', formData.username);
+      formDataToSend.append("username", formData.username);
       if (profileImage) {
-        formDataToSend.append('profileImage', profileImage);
+        formDataToSend.append("profileImage", profileImage);
       }
 
-      const response = await fetch(`http://localhost:8081/api/movies/users/${userEmail}/profile`, {
-        method: 'PUT',
-        body: formDataToSend
-      });
+      const response = await fetch(
+        `http://localhost:8081/api/movies/users/${userEmail}/profile`,
+        {
+          method: "PUT",
+          body: formDataToSend,
+        }
+      );
 
       if (response.ok) {
-
         //Update username in localStorage
-        localStorage.setItem('username',formData.username);
-        
+        localStorage.setItem("username", formData.username);
+
         setShowSuccess(true);
         setTimeout(() => {
           setShowSuccess(false);
           onClose();
         }, 2000);
       } else {
-        alert('Failed to update profile');
+        alert("Failed to update profile");
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
-      alert('Error updating profile');
+      console.error("Error updating profile:", error);
+      alert("Error updating profile");
     }
   };
 
@@ -73,14 +77,20 @@ const EditProfile = ({ userEmail, userProfile, onClose }) => {
       <div className="edit-profile-container">
         <div className="edit-profile-header">
           <h2>Edit Profile</h2>
-          <button className="close-button" onClick={onClose}>✕</button>
+          <button className="close-button" onClick={onClose}>
+            ✕
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="edit-profile-form">
           <div className="profile-image-section">
             <div className="profile-image-container">
               {previewImage ? (
-                <img src={previewImage} alt="Profile" className="profile-image-large" />
+                <img
+                  src={previewImage}
+                  alt="Profile"
+                  className="profile-image-large"
+                />
               ) : (
                 <div className="profile-placeholder">👤</div>
               )}
@@ -96,7 +106,7 @@ const EditProfile = ({ userEmail, userProfile, onClose }) => {
                 ref={fileInputRef}
                 onChange={handleImageUpload}
                 accept="image/*"
-                style={{ display: 'none' }}
+                style={{ display: "none" }}
               />
             </div>
           </div>
@@ -113,12 +123,7 @@ const EditProfile = ({ userEmail, userProfile, onClose }) => {
 
           <div className="form-group">
             <label>Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              readOnly
-            />
+            <input type="email" name="email" value={formData.email} readOnly />
           </div>
 
           <button type="submit" className="update-profile-btn">
