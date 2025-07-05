@@ -1,7 +1,6 @@
 package com.example.MovieService.feignClient;
 
 import com.example.MovieService.dto.UserDTO;
-import jakarta.annotation.PostConstruct;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
