@@ -29,6 +29,11 @@ const MovieService = ({ userEmail, onNavigate }) => {
   // Alert states
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
+  
+  // Hero section states
+  const [heroMovies, setHeroMovies] = useState([]);
+  const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
+  const [isLoadingHero, setIsLoadingHero] = useState(true);
 
   useEffect(() => {
     if (!userEmail) {
@@ -44,7 +49,19 @@ const MovieService = ({ userEmail, onNavigate }) => {
     fetchUserProfile();
     fetchMovieCategories();
     fetchFavorites();
+    fetchHeroMovies();
   }, [userEmail]);
+
+  // Hero rotation effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentHeroIndex((prevIndex) => 
+        prevIndex === heroMovies.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 3000); // Change every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [heroMovies.length]);
 
   const fetchUserProfile = async () => {
     try {
@@ -203,6 +220,29 @@ const MovieService = ({ userEmail, onNavigate }) => {
       );
     } finally {
       setIsLoadingMovies(false);
+    }
+  };
+
+  const fetchHeroMovies = async () => {
+    setIsLoadingHero(true);
+    try {
+      const token = getAuthToken();
+      const response = await fetch("http://localhost:8081/api/movies/popular", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        // Get first 6 movies for hero section
+        setHeroMovies(data.slice(0, 6));
+      }
+    } catch (error) {
+      console.error("Error fetching hero movies:", error);
+    } finally {
+      setIsLoadingHero(false);
     }
   };
 
@@ -377,6 +417,70 @@ const MovieService = ({ userEmail, onNavigate }) => {
             <span className="alert-message">{message}</span>
           </div>
           <button className="alert-close" onClick={onClose}>×</button>
+        </div>
+      </div>
+    );
+  };
+
+  // Hero Section Component
+  const HeroSection = () => {
+    if (isLoadingHero) {
+      return (
+        <div className="hero-section">
+          <div className="hero-shimmer">
+            <div className="hero-shimmer-background"></div>
+            <div className="hero-shimmer-content">
+              <div className="hero-shimmer-title"></div>
+              <div className="hero-shimmer-subtitle"></div>
+              <div className="hero-shimmer-overview"></div>
+              <div className="hero-shimmer-button"></div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (heroMovies.length === 0) return null;
+
+    const currentMovie = heroMovies[currentHeroIndex];
+
+    return (
+      <div className="hero-section">
+        <div className="hero-background">
+          <img
+            src={`https://image.tmdb.org/t/p/original${currentMovie.backdrop_path}`}
+            alt={currentMovie.title}
+            className="hero-backdrop"
+          />
+          <div className="hero-overlay"></div>
+        </div>
+        
+        <div className="hero-content">
+          <div className="hero-text">
+            <h3 className="hero-category">Recommended Movies</h3>
+            <h1 className="hero-title">{currentMovie.title}</h1>
+            <p className="hero-overview">
+              {currentMovie.overview?.substring(0, 200)}...
+            </p>
+            <div className="hero-actions">
+              <button 
+                className="hero-watch-btn"
+                onClick={() => handleMovieClick(currentMovie)}
+              >
+                Watch Now
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div className="hero-indicators">
+          {heroMovies.map((_, index) => (
+            <div
+              key={index}
+              className={`hero-indicator ${index === currentHeroIndex ? 'active' : ''}`}
+              onClick={() => setCurrentHeroIndex(index)}
+            />
+          ))}
         </div>
       </div>
     );
@@ -605,6 +709,7 @@ const MovieService = ({ userEmail, onNavigate }) => {
           renderMovieCategory("Search Results", searchResults, isSearching)
         ) : currentView === "home" ? (
           <>
+            <HeroSection />
             {renderMovieCategory(
               "Popular Movies",
               movies.popular,

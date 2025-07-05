@@ -714,3 +714,323 @@
     max-width: none;
   }
 }
+
+
+/* ---------------------------------------------------------------------------------------------------- */
+
+/* Hero Section Styles - Add these to your MovieService.css */
+
+.hero-section {
+  position: relative;
+  height: 70vh;
+  margin-bottom: 50px;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+.hero-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.hero-backdrop {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.8s ease-in-out;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+  z-index: 2;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 3;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 50px;
+}
+
+.hero-text {
+  max-width: 600px;
+  animation: fadeInUp 1s ease-out;
+}
+
+.hero-category {
+  color: #e50914;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.hero-title {
+  font-size: 4rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  color: white;
+  color: #ddd;
+  line-height: 1.1;
+  background: linear-gradient(45deg, #ffffff, #f0f0f0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-overview {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #ddd;
+  margin-bottom: 30px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.hero-actions {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.hero-watch-btn {
+  background: linear-gradient(45deg, #e50914, #ff1f28);
+  color: white;
+  border: none;
+  padding: 15px 40px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-watch-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.hero-watch-btn:hover::before {
+  left: 100%;
+}
+
+.hero-watch-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(229, 9, 20, 0.6);
+  background: linear-gradient(45deg, #ff1f28, #e50914);
+}
+
+.hero-watch-btn:active {
+  transform: translateY(0);
+}
+
+.hero-indicators {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 4;
+}
+
+.hero-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.hero-indicator.active {
+  background-color: #e50914;
+  transform: scale(1.2);
+  box-shadow: 0 2px 8px rgba(229, 9, 20, 0.6);
+}
+
+.hero-indicator:hover {
+  background-color: rgba(255, 255, 255, 0.7);
+  transform: scale(1.1);
+}
+
+/* Hero Shimmer Effects */
+.hero-shimmer {
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-shimmer-background {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    #2a2a2a 0%,
+    #3a3a3a 50%,
+    #2a2a2a 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.hero-shimmer-content {
+  position: absolute;
+  top: 50%;
+  left: 50px;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.hero-shimmer-title {
+  width: 400px;
+  height: 60px;
+  background: linear-gradient(
+    90deg,
+    #3a3a3a 0%,
+    #4a4a4a 50%,
+    #3a3a3a 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+.hero-shimmer-subtitle {
+  width: 200px;
+  height: 20px;
+  background: linear-gradient(
+    90deg,
+    #3a3a3a 0%,
+    #4a4a4a 50%,
+    #3a3a3a 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+.hero-shimmer-overview {
+  width: 500px;
+  height: 80px;
+  background: linear-gradient(
+    90deg,
+    #3a3a3a 0%,
+    #4a4a4a 50%,
+    #3a3a3a 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+.hero-shimmer-button {
+  width: 140px;
+  height: 50px;
+  background: linear-gradient(
+    90deg,
+    #3a3a3a 0%,
+    #4a4a4a 50%,
+    #3a3a3a 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-section {
+    height: 50vh;
+    margin-bottom: 30px;
+  }
+  
+  .hero-content {
+    padding: 0 20px;
+  }
+  
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .hero-overview {
+    font-size: 1rem;
+  }
+  
+  .hero-watch-btn {
+    padding: 12px 30px;
+    font-size: 1rem;
+  }
+  
+  .hero-shimmer-content {
+    left: 20px;
+  }
+  
+  .hero-shimmer-title {
+    width: 300px;
+    height: 40px;
+  }
+  
+  .hero-shimmer-overview {
+    width: 350px;
+    height: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .hero-shimmer-title {
+    width: 250px;
+    height: 35px;
+  }
+  
+  .hero-shimmer-overview {
+    width: 280px;
+    height: 50px;
+  }
+}
+
