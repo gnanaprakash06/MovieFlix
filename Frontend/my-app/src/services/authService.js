@@ -98,8 +98,18 @@ export const signInUser = async (credentials) => {
   }
 };
 
+// [FIX]: Update isAuthenticated to check localStorage instead of window
 export const isAuthenticated = () => {
-  return window.authToken !== undefined;
+  return !!localStorage.getItem('authToken');
+};
+
+// [FIX]: Add this new function to check and return auth state
+export const checkAuth = () => {
+  return {
+    isAuthenticated: !!localStorage.getItem('authToken'),
+    userEmail: localStorage.getItem('userEmail'),
+    username: localStorage.getItem('username')
+  };
 };
 
 export const getAuthToken = () => {
