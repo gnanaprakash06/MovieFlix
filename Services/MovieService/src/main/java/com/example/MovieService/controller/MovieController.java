@@ -73,7 +73,6 @@ public class MovieController {
             User newUser = new User();
             newUser.setEmail(email);
             newUser.setUsername(username);
-//            newUser.setUsername(profileData.getOrDefault("username", email.split("@")[0]));
             newUser.setFavorites(new ArrayList<>());
 
             movieService.createProfile(newUser);
@@ -124,6 +123,7 @@ public class MovieController {
             return ResponseEntity.notFound().build();
         }
     }
+
     @PutMapping(value = "/users/{email}/profile", consumes = {"multipart/form-data"})
     public ResponseEntity<String> updateProfile(
             @PathVariable String email,
@@ -201,7 +201,7 @@ public class MovieController {
             }
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            System.out.println("Error in getPopularMovies: " +e.getMessage());
+            System.out.println("Error in getPopularMovies: " + e.getMessage());
             return ResponseEntity.status(500).build();
         }
     }
@@ -215,7 +215,7 @@ public class MovieController {
             }
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            System.out.println("Error in searchMovies: "+e.getMessage());
+            System.out.println("Error in searchMovies: " + e.getMessage());
             return ResponseEntity.status(500).build();
         }
     }
@@ -283,7 +283,7 @@ public class MovieController {
             }
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            System.out.println("Error in getContentByGenre: "+e.getMessage());
+            System.out.println("Error in getContentByGenre: " + e.getMessage());
             return ResponseEntity.status(500).build();
         }
     }
