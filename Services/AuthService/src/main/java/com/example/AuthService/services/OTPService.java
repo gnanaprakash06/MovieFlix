@@ -3,6 +3,8 @@ package com.example.AuthService.services;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -31,7 +33,7 @@ public class OTPService {
         }
     }
 
-    private final ConcurrentHashMap<String, OTPData> otpStorage = new ConcurrentHashMap<>();
+    private final Map<String, OTPData> otpStorage = new HashMap<>();
     private final Random random = new Random();
     private static final int OTP_EXPIRY_MINUTES = 2;
 
