@@ -54,7 +54,7 @@ public class MovieController {
         }
     }
 
-    // ADD THIS NEW ENDPOINT - Missing create profile endpoint
+    // Profile creation in MongoDB
     @PostMapping("/users/{email}/create-profile")
     public ResponseEntity<?> createProfile(@PathVariable String email, @RequestBody Map<String, String> profileData) {
         try {
