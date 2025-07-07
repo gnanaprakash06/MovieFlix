@@ -41,7 +41,7 @@ public class OTPService {
         // Generate a 6-digit OTP
         String otp = String.format("%06d", random.nextInt(999999));
 
-        // Set expiry time (10 minutes from now)
+        // Set expiry time (2 minutes from now)
         LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(OTP_EXPIRY_MINUTES);
 
         // Store OTP with expiry time
