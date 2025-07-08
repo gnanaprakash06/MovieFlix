@@ -98,6 +98,61 @@ export const signInUser = async (credentials) => {
   }
 };
 
+// Password reset functions
+export const requestPasswordReset = async (email) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/forgot-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to send OTP");
+    }
+
+    return data;
+  } catch (error) {
+    if (error.message === "Failed to fetch") {
+      throw new Error(
+        "Unable to connect to server. Please check your connection."
+      );
+    }
+    throw error;
+  }
+};
+
+export const resetPassword = async (resetData) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/reset-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(resetData),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to reset password");
+    }
+
+    return data;
+  } catch (error) {
+    if (error.message === "Failed to fetch") {
+      throw new Error(
+        "Unable to connect to server. Please check your connection."
+      );
+    }
+    throw error;
+  }
+};
+
 // [FIX]: Update isAuthenticated to check localStorage instead of window
 export const isAuthenticated = () => {
   return !!localStorage.getItem('authToken');
