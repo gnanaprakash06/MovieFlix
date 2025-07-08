@@ -394,7 +394,7 @@ const MovieService = ({ userEmail, onNavigate }) => {
     );
   };
 
-  // Hero Section Component
+  // Updated Hero Section Component with better layout
   const HeroSection = () => {
     if (isLoadingHero) {
       return (
