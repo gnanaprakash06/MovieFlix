@@ -2,7 +2,11 @@ package com.example.AuthService.services;
 
 import com.example.AuthService.domain.Response;
 import com.example.AuthService.domain.User;
-import com.example.AuthService.exception.*;
+import com.example.AuthService.exception.AuthServiceException;
+import com.example.AuthService.exception.InvalidCredentialsException;
+import com.example.AuthService.exception.PasswordMismatchException;
+import com.example.AuthService.exception.UserAlreadyExistsException;
+import com.example.AuthService.exception.UserNotFoundException;
 import com.example.AuthService.repository.UserRepository;
 import com.example.AuthService.security.SecurityTokenGenerator;
 import org.springframework.http.HttpStatus;
