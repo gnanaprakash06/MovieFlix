@@ -2,10 +2,21 @@ package com.example.AuthService.controller;
 
 import com.example.AuthService.domain.Response;
 import com.example.AuthService.domain.User;
-import com.example.AuthService.exception.*;
+import com.example.AuthService.exception.AuthServiceException;
+import com.example.AuthService.exception.InvalidCredentialsException;
+import com.example.AuthService.exception.PasswordMismatchException;
+import com.example.AuthService.exception.UserAlreadyExistsException;
+import com.example.AuthService.exception.UserNotFoundException;
 import com.example.AuthService.services.AuthService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.Map;

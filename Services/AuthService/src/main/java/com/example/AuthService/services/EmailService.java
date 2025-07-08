@@ -1,5 +1,7 @@
 package com.example.AuthService.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -12,6 +14,8 @@ public class EmailService {
 
     @Value("${spring.mail.username}")
     private String fromEmail;
+
+    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 
     public EmailService(JavaMailSender emailSender) {
         this.emailSender = emailSender;
@@ -26,7 +30,7 @@ public class EmailService {
             message.setText(buildOTPEmailBody(otp));
 
             emailSender.send(message);
-            System.out.println("OTP email sent successfully to: " + toEmail);
+            logger.debug("OTP email sent successfully to: {}", toEmail);
 
         } catch (Exception e) {
             System.err.println("Failed to send OTP email to: " + toEmail);
