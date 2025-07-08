@@ -1,4 +1,4 @@
-package com.example.MovieService.dto;
+package com.example.MovieService.domain;
 
 public class UserDTO {
 
