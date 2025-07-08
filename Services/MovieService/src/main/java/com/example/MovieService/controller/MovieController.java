@@ -1,22 +1,31 @@
 package com.example.MovieService.controller;
 
 import com.example.MovieService.domain.User;
-import com.example.MovieService.dto.UserDTO;
+import com.example.MovieService.domain.UserDTO;
 import com.example.MovieService.exception.UserAlreadyExistsException;
 import com.example.MovieService.feignClient.UserAuthClient;
 import com.example.MovieService.service.MovieService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/movies")
@@ -187,7 +196,7 @@ public class MovieController {
                 logger.debug("Username updated successfully in Auth Service");
             }
         } catch (Exception e) {
-            logger.error("Error updating username in Auth Service: " + e.getMessage());
+            logger.error("Error updating username in Auth Service: {}", e.getMessage());
             // Don't throw exception to avoid breaking the profile update
         }
     }
@@ -201,7 +210,7 @@ public class MovieController {
             }
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            System.out.println("Error in getPopularMovies: " + e.getMessage());
+            logger.debug("Error in getPopularMovies: {}", e.getMessage());
             return ResponseEntity.status(500).build();
         }
     }
@@ -215,7 +224,7 @@ public class MovieController {
             }
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            System.out.println("Error in searchMovies: " + e.getMessage());
+            logger.debug("Error in searchMovies: {}", e.getMessage());
             return ResponseEntity.status(500).build();
         }
     }
@@ -283,7 +292,7 @@ public class MovieController {
             }
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            System.out.println("Error in getContentByGenre: " + e.getMessage());
+            logger.debug("Error in getContentByGenre: {}", e.getMessage());
             return ResponseEntity.status(500).build();
         }
     }
