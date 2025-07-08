@@ -1,12 +1,13 @@
 package com.example.AuthService.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class OTPService {
@@ -36,6 +37,7 @@ public class OTPService {
     private final Map<String, OTPData> otpStorage = new HashMap<>();
     private final Random random = new Random();
     private static final int OTP_EXPIRY_MINUTES = 2;
+    private static final Logger logger = LoggerFactory.getLogger(OTPService.class);
 
     public String generateOTP(String email) {
         // Generate a 6-digit OTP
@@ -47,7 +49,7 @@ public class OTPService {
         // Store OTP with expiry time
         otpStorage.put(email, new OTPData(otp, expiryTime));
 
-        System.out.println("Generated OTP for " + email + ": " + otp + " (expires at: " + expiryTime + ")");
+        logger.debug("Generated OTP for {}: {} (expires at: {})", email, otp, expiryTime);
 
         return otp;
     }
@@ -56,30 +58,30 @@ public class OTPService {
         OTPData otpData = otpStorage.get(email);
 
         if (otpData == null) {
-            System.out.println("No OTP found for email: " + email);
+            logger.debug("No OTP found for email: {}", email);
             return false;
         }
 
         if (otpData.isExpired()) {
-            System.out.println("OTP expired for email: " + email);
+            logger.debug("OTP expired for email: {}", email);
             otpStorage.remove(email); // Remove expired OTP
             return false;
         }
 
         boolean isValid = otpData.getOtp().equals(otp);
-        System.out.println("OTP validation for " + email + ": " + (isValid ? "SUCCESS" : "FAILED"));
+        logger.debug("OTP validation for {}: {}", email, isValid ? "SUCCESS" : "FAILED");
 
         return isValid;
     }
 
     public void clearOTP(String email) {
         otpStorage.remove(email);
-        System.out.println("Cleared OTP for email: " + email);
+        logger.debug("Cleared OTP for email: {}", email);
     }
 
     // Method to clean up expired OTPs (can be called periodically)
     public void cleanupExpiredOTPs() {
         otpStorage.entrySet().removeIf(entry -> entry.getValue().isExpired());
-        System.out.println("Cleaned up expired OTPs");
+        logger.debug("Cleaned up expired OTPs");
     }
 }
