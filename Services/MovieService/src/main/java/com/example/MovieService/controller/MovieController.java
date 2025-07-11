@@ -8,6 +8,7 @@ import com.example.MovieService.service.MovieService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -32,6 +33,8 @@ import java.util.Optional;
 @CrossOrigin(origins = "http://localhost:3000", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS}, allowedHeaders = "*")
 public class MovieController {
 
+    @Autowired
+    private RestTemplate restTemplate;
     private final UserAuthClient userAuthClient;
     private final MovieService movieService;
     private static final Logger logger = LoggerFactory.getLogger(MovieController.class);
@@ -94,7 +97,6 @@ public class MovieController {
     private String fetchUsernameFromAuthService(String email) {
         try {
             // Make HTTP request to auth service to get user details
-            RestTemplate restTemplate = new RestTemplate();
             String authServiceUrl = "http://localhost:8080/api/auth/user/" + email;
 
             ResponseEntity<Map> response = restTemplate.getForEntity(authServiceUrl, Map.class);
@@ -174,7 +176,6 @@ public class MovieController {
 
     private void updateUsernameInAuthService(String email, String username) {
         try {
-            RestTemplate restTemplate = new RestTemplate();
             String authServiceUrl = "http://localhost:8080/api/auth/user/" + email + "/username";
 
             Map<String, String> requestBody = new HashMap<>();
