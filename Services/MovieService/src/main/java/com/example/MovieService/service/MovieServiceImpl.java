@@ -6,32 +6,25 @@ import com.example.MovieService.feignClient.UserAuthClient;
 import com.example.MovieService.repository.MovieRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MovieServiceImpl implements MovieService {
 
     private final MovieRepository movieRepository;
     private final UserAuthClient userAuthClient;
-
-    @Autowired
-    private RestTemplate restTemplate;
-
-    @Value("${tmdb.api.key}")
-    private String tmdbApiKey;
-
-    @Value("${tmdb.base.url}")
-    private String tmdbBaseUrl; // TMDB URL
-
+    private final RestTemplate restTemplate = new RestTemplate();
+    private static final String tmdbApiKey = "4833b1d3a2c00e56714bd2905095d5c8";
+    private static final String tmdbBaseUrl = "https://api.themoviedb.org/3";
     private static final Logger logger = LoggerFactory.getLogger(MovieServiceImpl.class);
 
     public MovieServiceImpl(MovieRepository movieRepository, UserAuthClient userAuthClient) {
@@ -49,7 +42,6 @@ public class MovieServiceImpl implements MovieService {
         return movieRepository.findByEmail(email);
     }
 
-
     @Override
     public void registerUser(User user) throws UserAlreadyExistsException {
         if (movieRepository.findByEmail(user.getEmail()).isPresent()) {
@@ -62,7 +54,7 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public void createProfile(User user) {
         logger.debug("Creating profile for: {}", user.getEmail());
-        user.setPassword(null); //Don't store the password in movie service
+        user.setPassword(null);
         if (user.getFavorites() == null) {
             user.setFavorites(new ArrayList<>());
         }
@@ -81,40 +73,21 @@ public class MovieServiceImpl implements MovieService {
     public List<Map<String, Object>> fetchPopularMovies() {
         String url = tmdbBaseUrl + "/movie/popular?api_key=" + tmdbApiKey;
         try {
-            logger.debug("Fetching popular movies from: {}", url);
             ResponseEntity<Map> responseEntity = restTemplate.getForEntity(url, Map.class);
             Map<String, Object> response = responseEntity.getBody();
-            logger.debug("TMDB Popular Response: {}", response);
             if (response != null && response.containsKey("results")) {
                 List<Map<String, Object>> movies = (List<Map<String, Object>>) response.get("results");
-                logger.debug("Found {} popular movies", movies.size());
-                return enrichMoviesWithTrailersAndLogos(movies);
+                // Filter by vote count
+                return enrichMoviesWithTrailersAndLogos(movies.stream()
+                        .filter(movie -> {
+                            Integer voteCount = (Integer) movie.get("vote_count");
+                            return voteCount != null && voteCount >= 100;
+                        })
+                        .collect(Collectors.toList()));
             }
-            logger.debug("No results found in TMDB response");
             return new ArrayList<>();
         } catch (Exception e) {
             logger.debug("Error fetching popular movies: {}", e.getMessage());
-            e.printStackTrace();
-            return new ArrayList<>();
-        }
-    }
-
-    @Override
-    public List<Map<String, Object>> fetchMoviesFromTmdb(String title) {
-        String url = tmdbBaseUrl + "/search/movie?api_key=" + tmdbApiKey + "&query=" + title;
-        try {
-            logger.debug("Searching movies with URL: {}", url);
-            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
-            logger.debug("TMDB Search Response: {}", response);
-
-            if (response != null && response.containsKey("results")) {
-                List<Map<String, Object>> movies = (List<Map<String, Object>>) response.get("results");
-                return enrichMoviesWithTrailersAndLogos(movies);
-            }
-            return new ArrayList<>();
-        } catch (Exception e) {
-            logger.debug("Error searching movies: {}", e.getMessage());
-            e.printStackTrace();
             return new ArrayList<>();
         }
     }
@@ -123,22 +96,174 @@ public class MovieServiceImpl implements MovieService {
     public List<Map<String, Object>> fetchMoviesByGenre(String genreId, String type) {
         String endpoint = "movie".equals(type) ? "movie" : "tv";
         String url = String.format(tmdbBaseUrl + "/discover/%s?api_key=%s&with_genres=%s", endpoint, tmdbApiKey, genreId);
-        logger.debug("Fetching {} by genre - URL: {}", type, url);
         try {
             ResponseEntity<Map> responseEntity = restTemplate.getForEntity(url, Map.class);
             Map<String, Object> response = responseEntity.getBody();
-            logger.debug("Genre fetch response status: {}", responseEntity.getStatusCode());
             if (response != null && response.containsKey("results")) {
                 List<Map<String, Object>> content = (List<Map<String, Object>>) response.get("results");
-                logger.debug("Found " + content.size() + " items for genre " + genreId);
-                return enrichMoviesWithTrailersAndLogos(content);
+                // Filter by vote count
+                return enrichMoviesWithTrailersAndLogos(content.stream()
+                        .filter(movie -> {
+                            Integer voteCount = (Integer) movie.get("vote_count");
+                            return voteCount != null && voteCount >= 100;
+                        })
+                        .collect(Collectors.toList()));
             }
-            logger.debug("No results found for genre {}", genreId);
             return new ArrayList<>();
         } catch (Exception e) {
             logger.debug("Error fetching movies by genre {}: {}", genreId, e.getMessage());
-            e.printStackTrace();
             return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public List<Map<String, Object>> fetchMoviesFromTmdb(String title) {
+        // Remove any wildcard characters that might cause issues
+        String sanitizedTitle = title.replace("*", "").replace("?", "").trim();
+
+        // Handle single-letter search
+        if (sanitizedTitle.length() == 1) {
+            String letter = sanitizedTitle.toLowerCase();
+            String url = tmdbBaseUrl + "/discover/movie?api_key=" + tmdbApiKey;
+            try {
+                logger.debug("Fetching movies starting with letter: {}", letter);
+                ResponseEntity<Map> responseEntity = restTemplate.getForEntity(url, Map.class);
+                Map<String, Object> response = responseEntity.getBody();
+                logger.debug("TMDB Discover Response: {}", response);
+                if (response != null && response.containsKey("results")) {
+                    List<Map<String, Object>> movies = (List<Map<String, Object>>) response.get("results");
+
+                    // Remove duplicates based on movie ID
+                    Map<String, Map<String, Object>> uniqueMovies = new HashMap<>();
+                    for (Map<String, Object> movie : movies) {
+                        String movieId = movie.get("id").toString();
+                        uniqueMovies.putIfAbsent(movieId, movie);
+                    }
+
+                    // Filter movies starting with the specified letter
+                    List<Map<String, Object>> filteredMovies = uniqueMovies.values().stream()
+                            .filter(movie -> {
+                                String movieTitle = (String) movie.get("title");
+                                Integer voteCount = (Integer) movie.get("vote_count");
+                                return movieTitle != null &&
+                                        !movieTitle.isEmpty() &&
+                                        movieTitle.toLowerCase().startsWith(letter) &&
+                                        voteCount != null &&
+                                        voteCount >= 100;
+                            })
+                            .collect(Collectors.toList());
+
+                    logger.debug("Found {} movies starting with letter {}", filteredMovies.size(), letter);
+                    return enrichMoviesWithTrailersAndLogos(filteredMovies);
+                }
+                logger.debug("No results found for letter {}", letter);
+                return new ArrayList<>();
+            } catch (Exception e) {
+                logger.debug("Error fetching movies for letter {}: {}", letter, e.getMessage());
+                e.printStackTrace();
+                return new ArrayList<>();
+            }
+        } else {
+            // Handle multi-character search
+            String url = tmdbBaseUrl + "/search/movie?api_key=" + tmdbApiKey + "&query=" + sanitizedTitle;
+            try {
+                logger.debug("Searching movies with URL: {}", url);
+                Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+                logger.debug("TMDB Search Response: {}", response);
+                if (response != null && response.containsKey("results")) {
+                    List<Map<String, Object>> movies = (List<Map<String, Object>>) response.get("results");
+
+                    // Remove duplicates based on movie ID
+                    Map<String, Map<String, Object>> uniqueMovies = new HashMap<>();
+                    for (Map<String, Object> movie : movies) {
+                        String movieId = movie.get("id").toString();
+                        uniqueMovies.putIfAbsent(movieId, movie);
+                    }
+
+                    // Filter movies containing the search query
+                    List<Map<String, Object>> filteredMovies = uniqueMovies.values().stream()
+                            .filter(movie -> {
+                                String movieTitle = (String) movie.get("title");
+                                Integer voteCount = (Integer) movie.get("vote_count");
+                                return movieTitle != null &&
+                                        movieTitle.toLowerCase().contains(sanitizedTitle.toLowerCase()) &&
+                                        voteCount != null &&
+                                        voteCount >= 100;
+                            })
+                            .collect(Collectors.toList());
+
+                    return enrichMoviesWithTrailersAndLogos(filteredMovies);
+                }
+                return new ArrayList<>();
+            } catch (Exception e) {
+                logger.debug("Error searching movies: {}", e.getMessage());
+                e.printStackTrace();
+                return new ArrayList<>();
+            }
+        }
+    }
+
+    @Override
+    public Map<String, Object> fetchMovieDetails(String movieId) {
+        String url = tmdbBaseUrl + "/movie/" + movieId + "?api_key=" + tmdbApiKey;
+        try {
+            logger.debug("Fetching movie details for ID {} with URL: {}", movieId, url);
+            Map<String, Object> movie = restTemplate.getForObject(url, Map.class);
+            if (movie != null) {
+                List<Map<String, Object>> movies = new ArrayList<>();
+                movies.add(movie);
+                return enrichMoviesWithTrailersAndLogos(movies).get(0);
+            }
+            logger.debug("No movie found for ID: {}", movieId);
+            return null;
+        } catch (Exception e) {
+            logger.debug("Error fetching movie details for ID {}: {}", movieId, e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public Map<String, Object> getSubscriptionDetails(String email) {
+        Optional<User> userOptional = movieRepository.findByEmail(email);
+        Map<String, Object> subscriptionDetails = new HashMap<>();
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            subscriptionDetails.put("subscriptionPlan", user.getSubscriptionPlan());
+            subscriptionDetails.put("subscriptionPrice", user.getSubscriptionPrice());
+            subscriptionDetails.put("subscriptionEndDate", user.getSubscriptionEndDate());
+            subscriptionDetails.put("subscriptionStatus", user.getSubscriptionStatus());
+        }
+        return subscriptionDetails;
+    }
+
+    @Override
+    public void updateSubscription(String email, String plan, Double price, String endDate, String status) {
+        Optional<User> userOptional = movieRepository.findByEmail(email);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.setSubscriptionPlan(plan);
+            user.setSubscriptionPrice(price);
+            user.setSubscriptionEndDate(endDate);
+            user.setSubscriptionStatus(status);
+            movieRepository.save(user);
+            logger.debug("Subscription updated for user: {}", email);
+        }
+    }
+
+    @Override
+    public void cancelSubscription(String email) {
+        Optional<User> userOptional = movieRepository.findByEmail(email);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.setSubscriptionPlan(null);
+            user.setSubscriptionPrice(null);
+            user.setSubscriptionEndDate(null);
+            user.setSubscriptionStatus("inactive");
+            movieRepository.save(user);
+            logger.debug("Subscription canceled for user: {}", email);
+        } else {
+            logger.debug("User not found for subscription cancellation: {}", email);
         }
     }
 
@@ -152,17 +277,24 @@ public class MovieServiceImpl implements MovieService {
                 Map<String, Object> videoResponse = restTemplate.getForObject(videoUrl, Map.class);
                 if (videoResponse != null && videoResponse.containsKey("results")) {
                     List<Map<String, Object>> videos = (List<Map<String, Object>>) videoResponse.get("results");
-                    for (Map<String, Object> video : videos) {
-                        String type = (String) video.get("type");
-                        String site = (String) video.get("site");
-                        if (("Trailer".equals(type) || "Teaser".equals(type)) && "YouTube".equals(site)) {
-                            String videoKey = (String) video.get("key");
-                            movie.put("trailerUrl", "https://www.youtube.com/embed/" + videoKey);
-                            break;
-                        }
+                    Optional<Map<String, Object>> trailer = videos.stream()
+                            .filter(video -> {
+                                String type = (String) video.get("type");
+                                String site = (String) video.get("site");
+                                return ("Trailer".equals(type) || "Teaser".equals(type)) && "YouTube".equals(site);
+                            })
+                            .findFirst();
+                    if (trailer.isPresent()) {
+                        String videoKey = (String) trailer.get().get("key");
+                        movie.put("trailerUrl", "https://www.youtube.com/embed/" + videoKey);
+                    } else {
+                        movie.put("trailerUrl", null);
                     }
+                } else {
+                    movie.put("trailerUrl", null);
                 }
             } catch (Exception e) {
+                movie.put("trailerUrl", null);
                 logger.debug("Error fetching videos for movie ID {}: {}", movieId, e.getMessage());
             }
 

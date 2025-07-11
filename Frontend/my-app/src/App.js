@@ -19,7 +19,6 @@ function App() {
     username: null
   });
 
-  // Check auth state on initial load and set up auth state
   useEffect(() => {
     const authInfo = checkAuth();
     setAuthState(authInfo);
@@ -35,20 +34,17 @@ function App() {
     } else {
       setNavigationData(null);
     }
-    
-    // Update auth state when navigating to/from authenticated views
+
     if (view === "movieservice") {
       const authInfo = checkAuth();
       setAuthState(authInfo);
     } else if (view === "signin" || view === "signup") {
-      // Reset auth state when going to auth pages
       setAuthState({
         isAuthenticated: false,
         userEmail: null,
         username: null
       });
     } else if (view === "home") {
-      // Update auth state when going to home (for logout)
       const authInfo = checkAuth();
       setAuthState(authInfo);
     }
@@ -66,16 +62,16 @@ function App() {
         return <ForgotPassword onNavigate={onNavigate} />;
       case "resetpassword":
         return (
-          <ResetPassword 
-            onNavigate={onNavigate} 
-            email={navigationData?.email} 
+          <ResetPassword
+            onNavigate={onNavigate}
+            email={navigationData?.email}
           />
         );
       case "movieservice":
         return (
-          <MovieService 
-            userEmail={getUserEmail()} 
-            onNavigate={onNavigate} 
+          <MovieService
+            userEmail={getUserEmail()}
+            onNavigate={onNavigate}
           />
         );
       default:
@@ -83,24 +79,11 @@ function App() {
     }
   };
 
-  // Views that should show the header - now includes all main views
-  const viewsWithHeader = ["home", "movieservice"];
-  // Views that should show the footer
   const viewsWithFooter = ["movieservice"];
 
   return (
     <div className="App">
-      {/* Show Header on home and movieservice views */}
-      {/* {viewsWithHeader.includes(currentView) && (
-        <Header 
-          onNavigate={onNavigate} 
-          isAuthenticated={authState.isAuthenticated} 
-        />
-      )} */}
-
       {renderView()}
-
-      {/* Conditionally render Footer - show only on specific pages */}
       {viewsWithFooter.includes(currentView) && <Footer />}
     </div>
   );
