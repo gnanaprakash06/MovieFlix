@@ -24,6 +24,12 @@ public class User {
     private byte[] profileImage;
     private List<Map<String, Object>> favorites;
 
+    // Subscription fields
+    private String subscriptionPlan; // e.g., "Monthly", "Quarterly", "Yearly"
+    private Double subscriptionPrice; // e.g., 199.00, 499.00, 1499.00
+    private String subscriptionEndDate; // ISO date string
+    private String subscriptionStatus; // e.g., "active", "inactive"
+
     public User() {}
 
     public User(String id, String username, String email, String password, byte[] profileImage) {
@@ -34,6 +40,7 @@ public class User {
         this.profileImage = profileImage;
     }
 
+    // Getters and Setters
     public String getId() {
         return id;
     }
@@ -80,5 +87,38 @@ public class User {
 
     public void setFavorites(List<Map<String, Object>> favorites) {
         this.favorites = favorites;
+    }
+
+    // Subscription Getters and Setters
+    public String getSubscriptionPlan() {
+        return subscriptionPlan;
+    }
+
+    public void setSubscriptionPlan(String subscriptionPlan) {
+        this.subscriptionPlan = subscriptionPlan;
+    }
+
+    public Double getSubscriptionPrice() {
+        return subscriptionPrice;
+    }
+
+    public void setSubscriptionPrice(Double subscriptionPrice) {
+        this.subscriptionPrice = subscriptionPrice;
+    }
+
+    public String getSubscriptionEndDate() {
+        return subscriptionEndDate;
+    }
+
+    public void setSubscriptionEndDate(String subscriptionEndDate) {
+        this.subscriptionEndDate = subscriptionEndDate;
+    }
+
+    public String getSubscriptionStatus() {
+        return subscriptionStatus;
+    }
+
+    public void setSubscriptionStatus(String subscriptionStatus) {
+        this.subscriptionStatus = subscriptionStatus;
     }
 }

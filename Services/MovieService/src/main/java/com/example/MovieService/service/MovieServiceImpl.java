@@ -6,13 +6,12 @@ import com.example.MovieService.feignClient.UserAuthClient;
 import com.example.MovieService.repository.MovieRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,16 +21,9 @@ public class MovieServiceImpl implements MovieService {
 
     private final MovieRepository movieRepository;
     private final UserAuthClient userAuthClient;
-
-    @Autowired
-    private RestTemplate restTemplate;
-
-    @Value("${tmdb.api.key}")
-    private String tmdbApiKey;
-
-    @Value("${tmdb.base.url}")
-    private String tmdbBaseUrl; // TMDB URL
-
+    private final RestTemplate restTemplate = new RestTemplate();
+    private static final String tmdbApiKey = "4833b1d3a2c00e56714bd2905095d5c8";
+    private static final String tmdbBaseUrl = "https://api.themoviedb.org/3";
     private static final Logger logger = LoggerFactory.getLogger(MovieServiceImpl.class);
 
     public MovieServiceImpl(MovieRepository movieRepository, UserAuthClient userAuthClient) {
@@ -49,7 +41,6 @@ public class MovieServiceImpl implements MovieService {
         return movieRepository.findByEmail(email);
     }
 
-
     @Override
     public void registerUser(User user) throws UserAlreadyExistsException {
         if (movieRepository.findByEmail(user.getEmail()).isPresent()) {
@@ -62,7 +53,7 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public void createProfile(User user) {
         logger.debug("Creating profile for: {}", user.getEmail());
-        user.setPassword(null); //Don't store the password in movie service
+        user.setPassword(null);
         if (user.getFavorites() == null) {
             user.setFavorites(new ArrayList<>());
         }
@@ -106,7 +97,6 @@ public class MovieServiceImpl implements MovieService {
             logger.debug("Searching movies with URL: {}", url);
             Map<String, Object> response = restTemplate.getForObject(url, Map.class);
             logger.debug("TMDB Search Response: {}", response);
-
             if (response != null && response.containsKey("results")) {
                 List<Map<String, Object>> movies = (List<Map<String, Object>>) response.get("results");
                 return enrichMoviesWithTrailersAndLogos(movies);
@@ -130,7 +120,7 @@ public class MovieServiceImpl implements MovieService {
             logger.debug("Genre fetch response status: {}", responseEntity.getStatusCode());
             if (response != null && response.containsKey("results")) {
                 List<Map<String, Object>> content = (List<Map<String, Object>>) response.get("results");
-                logger.debug("Found " + content.size() + " items for genre " + genreId);
+                logger.debug("Found {} items for genre {}", content.size(), genreId);
                 return enrichMoviesWithTrailersAndLogos(content);
             }
             logger.debug("No results found for genre {}", genreId);
@@ -139,6 +129,50 @@ public class MovieServiceImpl implements MovieService {
             logger.debug("Error fetching movies by genre {}: {}", genreId, e.getMessage());
             e.printStackTrace();
             return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public Map<String, Object> getSubscriptionDetails(String email) {
+        Optional<User> userOptional = movieRepository.findByEmail(email);
+        Map<String, Object> subscriptionDetails = new HashMap<>();
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            subscriptionDetails.put("subscriptionPlan", user.getSubscriptionPlan());
+            subscriptionDetails.put("subscriptionPrice", user.getSubscriptionPrice());
+            subscriptionDetails.put("subscriptionEndDate", user.getSubscriptionEndDate());
+            subscriptionDetails.put("subscriptionStatus", user.getSubscriptionStatus());
+        }
+        return subscriptionDetails;
+    }
+
+    @Override
+    public void updateSubscription(String email, String plan, Double price, String endDate, String status) {
+        Optional<User> userOptional = movieRepository.findByEmail(email);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.setSubscriptionPlan(plan);
+            user.setSubscriptionPrice(price);
+            user.setSubscriptionEndDate(endDate);
+            user.setSubscriptionStatus(status);
+            movieRepository.save(user);
+            logger.debug("Subscription updated for user: {}", email);
+        }
+    }
+
+    @Override
+    public void cancelSubscription(String email) {
+        Optional<User> userOptional = movieRepository.findByEmail(email);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.setSubscriptionPlan(null);
+            user.setSubscriptionPrice(null);
+            user.setSubscriptionEndDate(null);
+            user.setSubscriptionStatus("inactive");
+            movieRepository.save(user);
+            logger.debug("Subscription canceled for user: {}", email);
+        } else {
+            logger.debug("User not found for subscription cancellation: {}", email);
         }
     }
 

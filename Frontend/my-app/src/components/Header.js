@@ -1,33 +1,31 @@
 import React from "react";
 import "../services/MovieService.css";
 
-const Header = ({ 
-  username, 
-  userProfile, 
-  currentView, 
-  setCurrentView, 
-  searchQuery, 
-  handleSearch, 
-  showSearchInput, 
-  setShowSearchInput, 
-  showProfileMenu, 
-  setShowProfileMenu, 
-  setShowEditProfile, 
-  handleLogout 
+const Header = ({
+  username,
+  userProfile,
+  currentView,
+  setCurrentView,
+  searchQuery,
+  handleSearch,
+  showSearchInput,
+  setShowSearchInput,
+  showProfileMenu,
+  setShowProfileMenu,
+  setShowEditProfile,
+  handleLogout
 }) => {
-  
+
   const handleSearchIconClick = () => {
     setShowSearchInput(true);
   };
 
   const handleSearchBlur = () => {
-    // Hide search input when it loses focus and is empty
     if (searchQuery.trim() === "") {
       setShowSearchInput(false);
     }
   };
 
-  // Search Icon SVG Component
   const SearchIcon = () => (
     <svg
       width="20"
@@ -65,6 +63,14 @@ const Header = ({
             onClick={() => setCurrentView("favorites")}
           >
             Favorites
+          </button>
+          <button
+            className={
+              currentView === "subscriptions" ? "nav-link active" : "nav-link"
+            }
+            onClick={() => setCurrentView("subscriptions")}
+          >
+            Subscriptions
           </button>
         </nav>
       </div>

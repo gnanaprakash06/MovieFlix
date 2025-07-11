@@ -5,10 +5,12 @@ import com.example.MovieService.domain.UserDTO;
 import com.example.MovieService.exception.UserAlreadyExistsException;
 import com.example.MovieService.feignClient.UserAuthClient;
 import com.example.MovieService.service.MovieService;
+import com.stripe.Stripe;
+import com.stripe.model.checkout.Session;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -21,6 +23,8 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -33,11 +37,12 @@ import java.util.Optional;
 @CrossOrigin(origins = "http://localhost:3000", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS}, allowedHeaders = "*")
 public class MovieController {
 
-    @Autowired
-    private RestTemplate restTemplate;
     private final UserAuthClient userAuthClient;
     private final MovieService movieService;
     private static final Logger logger = LoggerFactory.getLogger(MovieController.class);
+
+    @Value("${stripe.secret.key}")
+    private String stripeSecretKey;
 
     public MovieController(UserAuthClient userAuthClient, MovieService movieService) {
         this.userAuthClient = userAuthClient;
@@ -66,7 +71,6 @@ public class MovieController {
         }
     }
 
-    // Profile creation in MongoDB
     @PostMapping("/users/{email}/create-profile")
     public ResponseEntity<?> createProfile(@PathVariable String email, @RequestBody Map<String, String> profileData) {
         try {
@@ -75,17 +79,16 @@ public class MovieController {
                 return ResponseEntity.ok(existingUser.get());
             }
 
-            // Fetch username from auth service
             String username = fetchUsernameFromAuthService(email);
             if (username == null) {
-                username = email.split("@")[0]; // Fallback to email prefix
+                username = email.split("@")[0];
             }
 
-            // Create new user profile
             User newUser = new User();
             newUser.setEmail(email);
             newUser.setUsername(username);
             newUser.setFavorites(new ArrayList<>());
+            newUser.setSubscriptionStatus("inactive");
 
             movieService.createProfile(newUser);
             return ResponseEntity.ok("Profile created successfully");
@@ -96,7 +99,7 @@ public class MovieController {
 
     private String fetchUsernameFromAuthService(String email) {
         try {
-            // Make HTTP request to auth service to get user details
+            RestTemplate restTemplate = new RestTemplate();
             String authServiceUrl = "http://localhost:8080/api/auth/user/" + email;
 
             ResponseEntity<Map> response = restTemplate.getForEntity(authServiceUrl, Map.class);
@@ -150,7 +153,6 @@ public class MovieController {
             User existingUser = userOpt.get();
             if (username != null && !username.isBlank()) {
                 existingUser.setUsername(username);
-                // Update username in Auth Service SQL database
                 updateUsernameInAuthService(email, username);
             }
 
@@ -176,6 +178,7 @@ public class MovieController {
 
     private void updateUsernameInAuthService(String email, String username) {
         try {
+            RestTemplate restTemplate = new RestTemplate();
             String authServiceUrl = "http://localhost:8080/api/auth/user/" + email + "/username";
 
             Map<String, String> requestBody = new HashMap<>();
@@ -198,7 +201,6 @@ public class MovieController {
             }
         } catch (Exception e) {
             logger.error("Error updating username in Auth Service: {}", e.getMessage());
-            // Don't throw exception to avoid breaking the profile update
         }
     }
 
@@ -256,7 +258,7 @@ public class MovieController {
             favorites.add(movie);
             user.setFavorites(favorites);
             movieService.updateUser(user);
-            logger.debug("test");
+            logger.debug("Movie added to favorites for user: {}", email);
             return ResponseEntity.status(201).body("Movie added to favorites");
         }
         return ResponseEntity.ok("Movie already in favorites");
@@ -295,6 +297,123 @@ public class MovieController {
         } catch (Exception e) {
             logger.debug("Error in getContentByGenre: {}", e.getMessage());
             return ResponseEntity.status(500).build();
+        }
+    }
+
+    @GetMapping("/user/{email}/subscription")
+    public ResponseEntity<Map<String, Object>> getSubscriptionDetails(@PathVariable String email) {
+        try {
+            Map<String, Object> subscriptionDetails = movieService.getSubscriptionDetails(email);
+            if (subscriptionDetails.isEmpty()) {
+                return ResponseEntity.ok(new HashMap<>());
+            }
+            return ResponseEntity.ok(subscriptionDetails);
+        } catch (Exception e) {
+            logger.debug("Error fetching subscription details: {}", e.getMessage());
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    @PostMapping("/user/{email}/subscription")
+    public ResponseEntity<?> createSubscriptionSession(@PathVariable String email, @RequestBody Map<String, String> request) {
+        try {
+            String priceId = request.get("priceId");
+            if (priceId == null || priceId.isEmpty()) {
+                return ResponseEntity.badRequest().body("Price ID is required");
+            }
+
+            Map<String, String> priceToPlan = new HashMap<>();
+            priceToPlan.put("price_1RizszLfAxiezZFqDvjKOoEt", "Monthly");
+            priceToPlan.put("price_1Rj0xYLfAxiezZFqczUP9j0h", "Quarterly");
+            priceToPlan.put("price_1Rj12sLfAxiezZFq58taqr2o", "Yearly");
+
+            Map<String, Double> priceToAmount = new HashMap<>();
+            priceToAmount.put("price_1RizszLfAxiezZFqDvjKOoEt", 199.00);
+            priceToAmount.put("price_1Rj0xYLfAxiezZFqczUP9j0h", 499.00);
+            priceToAmount.put("price_1Rj12sLfAxiezZFq58taqr2o", 1499.00);
+
+            String plan = priceToPlan.get(priceId);
+            Double amount = priceToAmount.get(priceId);
+            if (plan == null || amount == null) {
+                return ResponseEntity.badRequest().body("Invalid price ID");
+            }
+
+            LocalDate endDate;
+            switch (plan) {
+                case "Monthly":
+                    endDate = LocalDate.now().plusMonths(1);
+                    break;
+                case "Quarterly":
+                    endDate = LocalDate.now().plusMonths(3);
+                    break;
+                case "Yearly":
+                    endDate = LocalDate.now().plusYears(1);
+                    break;
+                default:
+                    return ResponseEntity.badRequest().body("Invalid plan");
+            }
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("mode", "payment");
+            params.put("payment_method_types", new String[]{"card"});
+            params.put("line_items", new Object[]{
+                    new HashMap<String, Object>() {{
+                        put("price", priceId);
+                        put("quantity", 1);
+                    }}
+            });
+            params.put("success_url", "http://localhost:3000/?session_id={CHECKOUT_SESSION_ID}");
+            params.put("cancel_url", "http://localhost:3000/");
+            params.put("client_reference_id", email);
+            params.put("metadata", new HashMap<String, String>() {{
+                put("plan", plan);
+                put("amount", amount.toString());
+                put("end_date", endDate.format(DateTimeFormatter.ISO_LOCAL_DATE));
+            }});
+
+            Session session = Session.create(params);
+            Map<String, String> response = new HashMap<>();
+            response.put("url", session.getUrl());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error creating Stripe session: {}", e.getMessage());
+            return ResponseEntity.status(500).body("Error creating payment session: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/user/{email}/subscription/success")
+    public ResponseEntity<String> handleSubscriptionSuccess(@PathVariable String email, @RequestBody Map<String, String> request) {
+        try {
+            String sessionId = request.get("sessionId");
+            Session session = Session.retrieve(sessionId);
+            String plan = session.getMetadata().get("plan");
+            Double amount = Double.parseDouble(session.getMetadata().get("amount"));
+            String endDate = session.getMetadata().get("end_date");
+
+            movieService.updateSubscription(email, plan, amount, endDate, "active");
+            return ResponseEntity.ok("Subscription activated successfully");
+        } catch (Exception e) {
+            logger.error("Error processing subscription success: {}", e.getMessage());
+            return ResponseEntity.status(500).body("Error processing subscription: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/user/{email}/subscription")
+    public ResponseEntity<String> cancelSubscription(@PathVariable String email) {
+        try {
+            Optional<User> userOptional = movieService.findByEmail(email);
+            if (userOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found with email: " + email);
+            }
+            User user = userOptional.get();
+            if (!"active".equals(user.getSubscriptionStatus())) {
+                return ResponseEntity.badRequest().body("No active subscription to cancel");
+            }
+            movieService.cancelSubscription(email);
+            return ResponseEntity.ok("Subscription canceled successfully");
+        } catch (Exception e) {
+            logger.error("Error canceling subscription: {}", e.getMessage());
+            return ResponseEntity.status(500).body("Error canceling subscription: " + e.getMessage());
         }
     }
 }
