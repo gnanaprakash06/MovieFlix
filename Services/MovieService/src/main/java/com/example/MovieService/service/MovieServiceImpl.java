@@ -6,6 +6,8 @@ import com.example.MovieService.feignClient.UserAuthClient;
 import com.example.MovieService.repository.MovieRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -20,9 +22,16 @@ public class MovieServiceImpl implements MovieService {
 
     private final MovieRepository movieRepository;
     private final UserAuthClient userAuthClient;
-    private final RestTemplate restTemplate = new RestTemplate();
-    private static final String tmdbApiKey = "4833b1d3a2c00e56714bd2905095d5c8"; // TMDB API Key
-    private static final String tmdbBaseUrl = "https://api.themoviedb.org/3"; // TMDB URL
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Value("${tmdb.api.key}")
+    private String tmdbApiKey;
+
+    @Value("${tmdb.base.url}")
+    private String tmdbBaseUrl; // TMDB URL
+
     private static final Logger logger = LoggerFactory.getLogger(MovieServiceImpl.class);
 
     public MovieServiceImpl(MovieRepository movieRepository, UserAuthClient userAuthClient) {
