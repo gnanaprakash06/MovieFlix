@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class MovieServiceImpl implements MovieService {
-
     private final MovieRepository movieRepository;
     private final UserAuthClient userAuthClient;
     private final RestTemplate restTemplate = new RestTemplate();
@@ -118,10 +117,8 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public List<Map<String, Object>> fetchMoviesFromTmdb(String title) {
-        // Remove any wildcard characters that might cause issues
         String sanitizedTitle = title.replace("*", "").replace("?", "").trim();
 
-        // Handle single-letter search
         if (sanitizedTitle.length() == 1) {
             String letter = sanitizedTitle.toLowerCase();
             String url = tmdbBaseUrl + "/discover/movie?api_key=" + tmdbApiKey;
@@ -164,7 +161,6 @@ public class MovieServiceImpl implements MovieService {
                 return new ArrayList<>();
             }
         } else {
-            // Handle multi-character search
             String url = tmdbBaseUrl + "/search/movie?api_key=" + tmdbApiKey + "&query=" + sanitizedTitle;
             try {
                 logger.debug("Searching movies with URL: {}", url);
@@ -173,14 +169,12 @@ public class MovieServiceImpl implements MovieService {
                 if (response != null && response.containsKey("results")) {
                     List<Map<String, Object>> movies = (List<Map<String, Object>>) response.get("results");
 
-                    // Remove duplicates based on movie ID
                     Map<String, Map<String, Object>> uniqueMovies = new HashMap<>();
                     for (Map<String, Object> movie : movies) {
                         String movieId = movie.get("id").toString();
                         uniqueMovies.putIfAbsent(movieId, movie);
                     }
 
-                    // Filter movies containing the search query
                     List<Map<String, Object>> filteredMovies = uniqueMovies.values().stream()
                             .filter(movie -> {
                                 String movieTitle = (String) movie.get("title");

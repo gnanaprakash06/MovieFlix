@@ -1691,11 +1691,7 @@
     }
 }
 
-
 /* Existing styles remain unchanged, only adding new styles for browse-genre */
-
-/* Existing styles remain unchanged, only adding new styles for sort-select */
-
 .browse-genre-container {
   padding: 20px;
   max-width: 1400px;
@@ -1755,4 +1751,5 @@
     width: 100%;
     max-width: 300px;
   }
+  
 }

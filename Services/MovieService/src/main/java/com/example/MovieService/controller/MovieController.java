@@ -490,4 +490,5 @@ public class MovieController {
             return ResponseEntity.status(500).body("Error canceling subscription: " + e.getMessage());
         }
     }
+
 }

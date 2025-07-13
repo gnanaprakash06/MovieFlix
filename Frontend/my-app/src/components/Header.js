@@ -1,6 +1,5 @@
 import React from "react";
 import "../services/MovieService.css";
-
 const Header = ({
   username,
   userProfile,

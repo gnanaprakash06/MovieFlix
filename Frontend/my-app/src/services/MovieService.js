@@ -1055,5 +1055,4 @@ const MovieService = ({ userEmail, onNavigate }) => {
     </div>
   );
 };
-
 export default MovieService;

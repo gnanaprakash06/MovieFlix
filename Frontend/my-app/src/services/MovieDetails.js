@@ -55,5 +55,4 @@ const MovieDetails = ({ movie, onBack, isFavorite, onToggleFavorite }) => {
     </div>
   );
 };
-
 export default MovieDetails;
