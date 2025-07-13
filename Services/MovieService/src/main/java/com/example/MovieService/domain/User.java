@@ -39,7 +39,6 @@ public class User {
         this.password = password;
         this.profileImage = profileImage;
     }
-
     // Getters and Setters
     public String getId() {
         return id;

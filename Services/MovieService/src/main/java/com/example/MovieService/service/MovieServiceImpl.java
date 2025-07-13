@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class MovieServiceImpl implements MovieService {
-
     private final MovieRepository movieRepository;
     private final UserAuthClient userAuthClient;
     private final RestTemplate restTemplate = new RestTemplate();

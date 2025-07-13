@@ -19,6 +19,7 @@ public interface MovieService {
     List<User> findAllByEmail(String email);
     Map<String, Object> fetchMovieDetails(String movieId);
 
+
     // Subscription methods
     Map<String, Object> getSubscriptionDetails(String email);
     void updateSubscription(String email, String plan, Double price, String endDate, String status);
