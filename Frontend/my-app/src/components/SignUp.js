@@ -3,6 +3,7 @@ import {
   validateEmail,
   validatePassword,
   validateUsername,
+  validateConfirmPassword,
 } from "../utils/validation";
 import { signUpUser } from "../services/authService";
 import "../App.css";
@@ -24,10 +25,32 @@ const SignUp = ({ onNavigate }) => {
       ...prev,
       [name]: value,
     }));
+
+    // Real-time validation
+    let error = null;
+    if (name === "username") {
+      error = validateUsername(value);
+    } else if (name === "email") {
+      error = validateEmail(value);
+    } else if (name === "password") {
+      error = validatePassword(value);
+      // Also revalidate confirm password if it exists
+      if (formData.confirmPassword) {
+        const confirmError = validateConfirmPassword(value, formData.confirmPassword);
+        setErrors((prev) => ({
+          ...prev,
+          confirmPassword: confirmError,
+        }));
+      }
+    } else if (name === "confirmPassword") {
+      error = validateConfirmPassword(formData.password, value);
+    }
+
     setErrors((prev) => ({
       ...prev,
-      [name]: null,
+      [name]: error,
     }));
+
     setServerError("");
   };
 
@@ -36,13 +59,13 @@ const SignUp = ({ onNavigate }) => {
     const usernameError = validateUsername(formData.username);
     const emailError = validateEmail(formData.email);
     const passwordError = validatePassword(formData.password);
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
-    }
+
+    const confirmPasswordError = validateConfirmPassword(formData.password, formData.confirmPassword);
 
     if (usernameError) newErrors.username = usernameError;
     if (emailError) newErrors.email = emailError;
     if (passwordError) newErrors.password = passwordError;
+    if (confirmPasswordError) newErrors.confirmPassword = confirmPasswordError;
 
     return newErrors;
   };
@@ -146,7 +169,7 @@ const SignUp = ({ onNavigate }) => {
         <button
           type="submit"
           className="auth-button"
-          disabled={Object.keys(errors).length < 0}
+          disabled={Object.keys(errors).some(key => errors[key] !== null)}
         >
           Sign Up
         </button>
@@ -162,3 +185,4 @@ const SignUp = ({ onNavigate }) => {
 };
 
 export default SignUp;
+

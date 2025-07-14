@@ -22,10 +22,19 @@ const SignIn = ({ onNavigate }) => {
       ...prev,
       [name]: value,
     }));
+
+       
+    // Real-time validation for email
+    let error = null;
+    if (name === "email") {
+      error = validateEmail(value);
+    }
+
     setErrors((prev) => ({
       ...prev,
-      [name]: null,
+      [name]: error,
     }));
+    
     setServerError("");
   };
 

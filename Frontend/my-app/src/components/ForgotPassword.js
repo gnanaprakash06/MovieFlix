@@ -7,6 +7,15 @@ const ForgotPassword = ({ onNavigate }) => {
   const [forgotPasswordError, setForgotPasswordError] = useState("");
   const [forgotSuccess, setForgotSuccess] = useState(false);
 
+    const handleEmailChange = (e) => {
+    const value = e.target.value;
+    setForgotPasswordEmail(value);
+    
+    // Real-time validation
+    const error = validateEmail(value);
+    setForgotPasswordError(error || "");
+  };
+
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     const emailError = validateEmail(forgotPasswordEmail);
@@ -51,10 +60,8 @@ const ForgotPassword = ({ onNavigate }) => {
             type="email"
             name="email"
             value={forgotPasswordEmail}
-            onChange={(e) => {
-              setForgotPasswordEmail(e.target.value);
-              setForgotPasswordError("");
-            }}
+            onChange={handleEmailChange}
+
             className={`form-input ${
               forgotPasswordError ? "form-input-error" : ""
             }`}

@@ -7,6 +7,23 @@ export const validateEmail = (email) => {
     return 'Email is required';
   }
   
+  // Check for spaces at the beginning
+  if (email.startsWith(' ')) {
+    return 'Email cannot start with spaces';
+  }
+  
+  // Check for multiple @ symbols
+  const atCount = (email.match(/@/g) || []).length;
+  if (atCount > 1) {
+    return 'Email cannot contain multiple @ symbols';
+  }
+  
+  // Check for invalid special characters
+  const invalidChars = /[,;*]/;
+  if (invalidChars.test(email)) {
+    return 'Email cannot contain special characters like , ; *';
+  }
+  
   if (/^[0-9]/.test(email.trim())) {
     return 'Email cannot start with a number';
   }
@@ -26,6 +43,11 @@ export const validatePassword = (password) => {
   
   if (!password.trim()) {
     return 'Password is required';
+  }
+  
+  // Check for spaces
+  if (/\s/.test(password)) {
+    return 'Password cannot contain spaces';
   }
   
   if (password.length < 8) {
@@ -65,16 +87,39 @@ export const validateUsername = (username) => {
     return 'Username must be at least 3 characters long';
   }
   
-  if (trimmedUsername.length > 20) {
-    return 'Username must be less than 20 characters';
+  if (trimmedUsername.length > 15) {
+    return 'Username must be less than 15 characters';
   }
   
   if (!/^[a-zA-Z]/.test(trimmedUsername)) {
     return 'Username must start with a letter';
   }
-
+  
+  // Check if username starts or ends with underscore
+  if (trimmedUsername.startsWith('_') || trimmedUsername.endsWith('_')) {
+    return 'Username cannot start or end with an underscore';
+  }
+  
+  // Check for spaces
+  if (/\s/.test(trimmedUsername)) {
+    return 'Username cannot contain spaces';
+  }
+  
+  // Check for invalid special characters (only letters, numbers, and underscores allowed)
   if (!/^[a-zA-Z0-9_]+$/.test(trimmedUsername)) {
     return 'Username can only contain letters, numbers, and underscores';
+  }
+  
+  return null;
+};
+
+export const validateConfirmPassword = (password, confirmPassword) => {
+  if (!confirmPassword) {
+    return 'Confirm password is required';
+  }
+  
+  if (password !== confirmPassword) {
+    return 'Passwords do not match';
   }
   
   return null;

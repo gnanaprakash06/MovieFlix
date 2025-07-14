@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { validatePassword } from "../utils/validation";
+import { validatePassword, validateConfirmPassword } from "../utils/validation";
 import "../App.css";
 
 const ResetPassword = ({ onNavigate, email }) => {
@@ -18,9 +18,28 @@ const ResetPassword = ({ onNavigate, email }) => {
       ...prev,
       [name]: value,
     }));
+
+    // Real-time validation
+    let error = null;
+    if (name === "otp") {
+      error = value ? null : "OTP is required";
+    } else if (name === "newPassword") {
+      error = validatePassword(value);
+      // Also revalidate confirm password if it exists
+      if (resetFormData.confirmPassword) {
+        const confirmError = validateConfirmPassword(value, resetFormData.confirmPassword);
+        setErrors((prev) => ({
+          ...prev,
+          confirmPassword: confirmError,
+        }));
+      }
+    } else if (name === "confirmPassword") {
+      error = validateConfirmPassword(resetFormData.newPassword, value);
+    }
+
     setErrors((prev) => ({
       ...prev,
-      [name]: null,
+      [name]: error,
     }));
     setResetError("");
   };
@@ -31,9 +50,9 @@ const ResetPassword = ({ onNavigate, email }) => {
     if (!resetFormData.otp) newErrors.otp = "OTP is required";
     const passwordError = validatePassword(resetFormData.newPassword);
     if (passwordError) newErrors.newPassword = passwordError;
-    if (resetFormData.newPassword !== resetFormData.confirmPassword) {
-      newErrors.confirmPassword = "Password does not match";
-    }
+
+    const confirmPasswordError = validateConfirmPassword(resetFormData.newPassword, resetFormData.confirmPassword);
+    if (confirmPasswordError) newErrors.confirmPassword = confirmPasswordError;
 
     if (Object.keys(newErrors).length > 0) {
       setResetError("");
