@@ -788,7 +788,7 @@ const MovieService = ({ userEmail, onNavigate }) => {
 
   const renderFavorites = () => (
     <div className="movie-category">
-      <h2 className="category-title favorites-title">Favorites</h2>
+      {/* <h2 className="category-title favorites-title">Favorites</h2> */}
       <div className="movie-grid">
         {isLoadingFavorites ? (
           Array(6)
