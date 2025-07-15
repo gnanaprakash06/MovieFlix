@@ -9,6 +9,7 @@ import com.stripe.model.checkout.Session;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -39,6 +40,8 @@ public class MovieController {
 
     private final UserAuthClient userAuthClient;
     private final MovieService movieService;
+    @Autowired
+    private RestTemplate restTemplate;
     private static final Logger logger = LoggerFactory.getLogger(MovieController.class);
 
     @Value("${stripe.secret.key}")
@@ -100,7 +103,6 @@ public class MovieController {
 
     private String fetchUsernameFromAuthService(String email) {
         try {
-            RestTemplate restTemplate = new RestTemplate();
             String authServiceUrl = "http://localhost:8080/api/auth/user/" + email;
 
             ResponseEntity<Map> response = restTemplate.getForEntity(authServiceUrl, Map.class);
@@ -179,7 +181,6 @@ public class MovieController {
 
     private void updateUsernameInAuthService(String email, String username) {
         try {
-            RestTemplate restTemplate = new RestTemplate();
             String authServiceUrl = "http://localhost:8080/api/auth/user/" + email + "/username";
 
             Map<String, String> requestBody = new HashMap<>();
