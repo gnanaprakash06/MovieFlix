@@ -14,9 +14,6 @@ import org.springframework.web.filter.GenericFilterBean;
 import java.io.IOException;
 
 public class JwtFilter extends GenericFilterBean {
-    @Value("${jwt.secret}")
-    private String secretKey;
-
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
             throws IOException, ServletException {
@@ -42,7 +39,7 @@ public class JwtFilter extends GenericFilterBean {
         try {
             String token = authHeader.substring(7); // Remove "Bearer "
             Claims claims = Jwts.parser()
-                    .setSigningKey(secretKey)
+                    .setSigningKey("secretKey")
                     .parseClaimsJws(token)
                     .getBody();
             request.setAttribute("claims", claims);
